@@ -8,5 +8,12 @@ d3.csv("https://raw.githubusercontent.com/Arnav-Negi/data-viz-project/main/data/
     console.log(data)
 
     const duration = 1000; // duration between keyframes
-    d3.group(data, d => d.Country)
+    d3.group(data, d => d.Country);
+
+    // number of bars that show
+    const n = 12;
+
+    const countryNames = new Set(data.map(d => d.Country));
+    
+    
 });
