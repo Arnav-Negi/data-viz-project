@@ -8,13 +8,13 @@ const duration = 200; // duration between keyframes
 const n = 12;
 
 // number of interpolated keyframes
-const k = 50;
+const k = 20;
 
 const barSize = 45;
 
 const margin = {
-    top: 30,
-    left: 0,
+    top: 100,
+    left: 50,
     right: 30,
     bottom: 0
 }
@@ -77,6 +77,24 @@ let counter = svg.append("text")
     .attr("y", barSize * (n - 0.45))
     .attr("dy", "0.32em")
     .attr('stroke', 'black')
+
+let xAxisLabel = svg.append("text")
+    .style("font", 'bold \"Helvetica Neue\", Helvetica, Arial, sans-serif')
+    .style('font-size', '1.5em')
+    .style("font-variant-numeric", "tabular-nums")
+    .attr("x", width / 2 - 25)
+    .attr("y", -30)
+    .text("Deaths for this year")
+
+let yAxisLabel = svg.append("text")
+    .style("font", 'bold \"Helvetica Neue\", Helvetica, Arial, sans-serif')
+    .style('font-size', '1.5em')
+    .style("font-variant-numeric", "tabular-nums")
+    .attr("x", -heightChart / 2)
+    .attr("y", -10)
+    .attr("transform", "rotate(-90)")
+    .text("Country");
+
 
 async function play() {
     if (!ready) return;
