@@ -54,6 +54,10 @@ with open("data/continents-according-to-our-world-in-data.csv") as f:
     for i in range(0, len(temp_data)):
         max = 30
         for j in range(0, len(consolidated_data)):
+            if(consolidated_data[j]["code"] == "OWID_WRL"):
+                consolidated_data[j]["continent"] = "World"
+                continue
+            
             if(consolidated_data[j]["code"] == temp_data[i]["code"]):
                 if max == 0:
                     break
@@ -121,8 +125,8 @@ for i in range(0, 5):
 # write to csv
 with open('data/deaths_health_gdp.csv', 'w') as f:
     writer = csv.writer(f)
-    writer.writerow(["country", "code", "year", "total_deaths", "exp", "gdp"])
+    writer.writerow(["country", "code", "year", "total_deaths", "exp", "gdp", "continent"])
     
     for line in consolidated_data:
         print(line)
-        writer.writerow([line["country"], line["code"], line["year"], line["total_deaths"], line["exp"], line["gdp"]])
+        writer.writerow([line["country"], line["code"], line["year"], line["total_deaths"], line["exp"], line["gdp"], line["continent"]])
