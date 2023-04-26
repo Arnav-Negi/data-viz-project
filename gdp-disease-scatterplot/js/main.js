@@ -16,6 +16,7 @@ const countries = [
     "Philippines",
     "Egypt",
     "Vietnam",
+    "DR Congo",
     "Iran",
     "Turkey",
     "Germany",
@@ -52,10 +53,7 @@ const countries = [
     "Venezuela",
     "Madagascar",
     "Cameroon",
-    "Côte d'Ivoire",
-    "North Korea",
     "Australia",
-    "Taiwan",
     "Niger",
     "Sri Lanka",
     "Burkina Faso",
@@ -115,6 +113,7 @@ const countries = [
     "Denmark",
     "Finland",
     "Slovakia",
+    "Congo",
     "Norway",
     "Oman",
     "Costa Rica",
@@ -140,6 +139,24 @@ const countries = [
     "Lithuania",
     "Namibia"
 ];
+
+const errorMap = {
+    'Egypt, Arab Rep.': 'Egypt',
+    'Bahamas, The': 'Bahamas',
+    'Brunei Darussalam': 'Brunei',
+    'Congo, Dem. Rep.': 'DR Congo',
+    'Congo, Rep.': 'Congo',
+    'Iran, Islamic Rep.': 'Iran',
+    'Kyrgyz Republic': 'Kyrgyzstan',
+    'Lao PDR': 'Laos',
+    'Russian Federation': 'Russia',
+    'Slovak Republic': 'Slovakia',
+    'Korea, Rep.': 'South Korea',
+    'Syrian Arab Republic': 'Syria',
+    'Turkiye': 'Turkey',
+    'Venezuela, RB': 'Venezuela',
+    'Yemen, Rep.': 'Yemen',
+}
 
 const startYear = 2000;
 const endYear = 2019;
@@ -233,7 +250,8 @@ d3.csv("https://raw.githubusercontent.com/Arnav-Negi/data-viz-project/main/data/
             maxHealthExpenditure = Math.max(maxHealthExpenditure, +data[i.toString()]);
         }
     }
-    healthExpenditure[data["Country Name"]] = toPush;
+    const name = errorMap[data["Country Name"]] ? errorMap[data["Country Name"]] : data["Country Name"];
+    healthExpenditure[name] = toPush;
 }).then(function () {
     console.log(healthExpenditure)
     d3.csv("https://raw.githubusercontent.com/Arnav-Negi/data-viz-project/main/data/burden-of-disease-rates-from-ncds.csv", function (data) {
