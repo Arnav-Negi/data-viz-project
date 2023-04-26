@@ -44,7 +44,7 @@ const svg = d3.select('#main')
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
 
 
-const color = d3.scaleOrdinal();
+let color = d3.scaleOrdinal();
 
 const keyframes = [];
 let prev, next;

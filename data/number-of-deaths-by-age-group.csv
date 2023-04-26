@@ -1,4 +1,4 @@
-Entity,Code,Year,Deaths - All causes - Sex: Both - Age: 70+ years (Number),Deaths - All causes - Sex: Both - Age: 50-69 years (Number),Deaths - All causes - Sex: Both - Age: 15-49 years (Number),Deaths - All causes - Sex: Both - Age: 5-14 years (Number),Deaths - All causes - Sex: Both - Age: Under 5 (Number)
+coutry,code,year,>70,50-69,15-49,5-14,<5
 Afghanistan,AFG,1990,34681,40624,22968,5642,78170
 Afghanistan,AFG,1991,35271,41414,26523,6433,83035
 Afghanistan,AFG,1992,35694,41829,30000,6854,93859

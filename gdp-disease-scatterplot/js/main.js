@@ -245,7 +245,7 @@ d3.csv("https://raw.githubusercontent.com/Arnav-Negi/data-viz-project/main/data/
     let toPush = {}
 
     for (let i = startYear; i <= endYear; i++) {
-        if (data[i.toString()] !== "") {
+        if (+data[i.toString()] > 10) {
             toPush[i.toString()] = +data[i.toString()];
             maxHealthExpenditure = Math.max(maxHealthExpenditure, +data[i.toString()]);
         }
