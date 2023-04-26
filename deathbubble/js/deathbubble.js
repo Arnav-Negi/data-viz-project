@@ -71,7 +71,7 @@ function BubbleChart(data, {
         .attr("id", (d, i) => {
             return `bubble-${i}`
         })
-        .attr("stroke", stroke)
+        .attr("stroke", G ? d => color(G[d.data]) : fill == null ? "none" : fill)
         .attr("stroke-width", strokeWidth)
         .attr("stroke-opacity", strokeOpacity)
         .attr("fill", G ? d => color(G[d.data]) : fill == null ? "none" : fill)
@@ -169,10 +169,9 @@ getData().then((data) => {
         value: d => d.value,
         group: d => d.name,
         label: d => `${d.name}\n${d.value.toLocaleString("en")}`,
-        stroke: "#000",
-        padding: 3,
-        strokeWidth: 1,
-        fillOpacity: 0.7,
+        padding: 5,
+        strokeWidth: 2,
+        fillOpacity: 0.6,
         width: 1200,
         height: 1200,
         top10Diseases: top10Diseases,
