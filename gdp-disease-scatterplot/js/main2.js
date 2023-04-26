@@ -44,10 +44,9 @@ getData().then((data) => {
 
 
     let x = d3.scaleLog()
-        .domain([1, 1000])
+        .domain([20000, 200000])
         // .domain(d3.extent(data.filter(d => d.year == yearToDisplay), d => d.exp))
-        .range([margin.left, width - margin.right])
-        .nice();
+        .range([margin.left, width - margin.right]);
 
     let y = d3.scaleLog()
         .domain(d3.extent(data.filter(d => d.year == yearToDisplay), d => d.total_deaths))
@@ -77,10 +76,9 @@ getData().then((data) => {
         console.log(output.value == 1991);
 
         // update scales
-        x = d3.scaleLog().domain([1, 1000])
+        x = d3.scaleLog().domain([20000, 200000])
             // .domain(d3.extent(data.filter(d => d.year == yearToDisplay), d => d.exp))
-            .range([margin.left, width - margin.right])
-            .nice();
+            .range([margin.left, width - margin.right]);
         
         y = d3.scaleLog()
             .domain(d3.extent(data.filter(d => d.year == yearToDisplay), d => d.total_deaths))
