@@ -92,7 +92,7 @@ with open('data/disease-burden-vs-health-expenditure-per-capita.csv', 'r') as f:
         temp_data["country"] = line[0]
         temp_data["code"] = line[1]
         temp_data["year"] = line[2]
-        temp_data["exp"] = line[4]
+        temp_data["exp"] = line[3]
         
         add_to_consolidated(temp_data, "exp")
 

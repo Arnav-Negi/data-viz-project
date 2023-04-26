@@ -20,6 +20,7 @@ getData().then((data) => {
 
     data = data.filter(d => {
         if (d.gdp > 0 && d.exp > 0 && d.country !== 'World') {
+            console.log(d.country, d.gdp, d.exp, d.total_deaths)
             return d;
         }
     });
@@ -43,7 +44,7 @@ getData().then((data) => {
 
 
     let x = d3.scaleLog()
-        .domain([10000, 100000])
+        .domain([1, 1000])
         // .domain(d3.extent(data.filter(d => d.year == yearToDisplay), d => d.exp))
         .range([margin.left, width - margin.right])
         .nice();
@@ -76,7 +77,7 @@ getData().then((data) => {
         console.log(output.value == 1991);
 
         // update scales
-        x = d3.scaleLog().domain([10000, 100000])
+        x = d3.scaleLog().domain([1, 1000])
             // .domain(d3.extent(data.filter(d => d.year == yearToDisplay), d => d.exp))
             .range([margin.left, width - margin.right])
             .nice();
