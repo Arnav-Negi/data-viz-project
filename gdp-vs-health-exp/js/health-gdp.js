@@ -47,7 +47,7 @@ getData().then((data) => {
         .range([margin.left, width - margin.right])
         .nice();
 
-    y = d3.scaleLinear()
+    y = d3.scaleLog()
         .domain(d3.extent(data.filter(d => d.year == yearToDisplay), d => d.exp))
         .range([height - margin.bottom, margin.top])
         .nice();
@@ -80,7 +80,7 @@ getData().then((data) => {
             .range([margin.left, width - margin.right])
             .nice();
         
-        y = d3.scaleLinear()
+        y = d3.scaleLog()
             .domain(d3.extent(data.filter(d => d.year == yearToDisplay), d => d.exp))
             .range([height - margin.bottom, margin.top])
             .nice();
