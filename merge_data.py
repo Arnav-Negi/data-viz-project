@@ -21,6 +21,9 @@ with open('data/annual-number-of-deaths-by-cause.csv', 'r') as f:
         if(line[1] == ""):
             continue
         
+        if(int(line[2]) < 2000):
+            continue
+        
         country_data = {}
         country_data["country"] = line[0]
         country_data["code"] = line[1]
@@ -92,7 +95,7 @@ with open('data/disease-burden-vs-health-expenditure-per-capita.csv', 'r') as f:
         temp_data["country"] = line[0]
         temp_data["code"] = line[1]
         temp_data["year"] = line[2]
-        temp_data["exp"] = line[3]
+        temp_data["exp"] = line[4]
         
         add_to_consolidated(temp_data, "exp")
 

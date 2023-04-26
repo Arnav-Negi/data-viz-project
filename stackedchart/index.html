@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Stacked bar chart showing deaths over years</title>
+    <script src="https://d3js.org/d3.v6.js"></script>
+    <script src="https://d3js.org/d3-geo-projection.v3.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+</head>
+
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<div id="my_dataviz"></div>
+<script>
+
+    var margin = { top: 110, right: 30, bottom: 20, left: 350 },
+        width = 860 - margin.left - margin.right + 300,
+        height = 600 - margin.top - margin.bottom + 100;
+
+    var svg = d3.select("#my_dataviz")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    d3.csv("https://raw.githubusercontent.com/himanibelsare/data-vis-files/main/cause_of_deaths.csv", function (data) {
+        // let filteredData = { "Year": 0, "Meningitis": 0, "Alzheimer": 0, "Parkinsons": 0, "Nutritional": 0, "Malaria": 0, "Drowning": 0, "Interpersonal Violence": 0, "Maternal Disorders": 0, "HIV/AIDS": 0, "Drug": 0, "Tuberculosis": 0, "Cardiovascular": 0, "Lower Respiratory": 0, "Neonatal": 0, "Alcohol": 0, "Self-harm": 0, "Nature": 0, "Diarrheal": 0, "Heat/Cold": 0, "Neoplasms": 0, "Terrorism": 0, "Diabetes": 0, "Kidney": 0, "Poisonings": 0, "Malnutrition": 0, "Road": 0, "Chronic Respiratory": 0, "Liver": 0, "Digestive": 0, "Fire": 0, "Hepatitis": 0 };
+
+        const myArray = []
+        for (let year = 1990; year <= 2019; year++) {
+            const filteredData = {
+                Year: year, Meningitis: 0, Alzheimer: 0, Parkinsons: 0, Nutritional: 0, Malaria: 0, Drowning: 0, "Interpersonal Violence": 0, "Maternal Disorders": 0, "HIV/AIDS": 0, "Drug": 0, Tuberculosis: 0, Cardiovascular: 0, "Lower Respiratory": 0, Neonatal: 0, Alcohol: 0, "Self-harm": 0, Nature: 0, Diarrheal: 0, "Heat/Cold": 0, Neoplasms: 0, Terrorism: 0, Diabetes: 0, Kidney: 0, Poisonings: 0, Malnutrition: 0, Road: 0, "Chronic Respiratory": 0, Liver: 0, Digestive: 0, Fire: 0, Hepatitis: 0
+            };
+
+            data.forEach(current => {
+                if (current.Year === year.toString()) {
+                    for (const [key, value] of Object.entries(current)) {
+                        if (key !== "Country" && key !== "Code" && key !== "Year") {
+                            if (filteredData.hasOwnProperty(key)) {
+                                filteredData[key] += parseInt(value);
+                            }
+                        }
+                    }
+                }
+            });
+
+            myArray.push(Object.assign({}, filteredData));
+        }
+        // console.log(myArray);
+
+        var subgroups = data.columns.slice(3)
+        console.log(subgroups);
+
+        var groups = d3.map(data, function (d) { return (d.Year) }).keys()
+        // console.log(groups);
+
+        // Add X axis
+        var x = d3.scaleBand()
+            .domain(groups)
+            .range([0, width])
+            .padding([0.2])
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x).tickSizeOuter(0));
+
+        // Add Y axis
+        var y = d3.scaleLinear()
+            .domain([0, 100])
+            .range([height, 0]);
+        svg.append("g")
+            .call(d3.axisLeft(y));
+
+        var color = d3.scaleOrdinal()
+            .domain(subgroups)
+            .range(['#FFB6C1', '#FF69B4', '#FFC0CB', '#F08080', '#CD5C5C', '#FFA07A', '#FF8C00', '#FFD700', '#FFFF00', '#ADFF2F', '#00FF7F', '#00FFFF', '#40E0D0', '#00BFFF', '#1E90FF', '#4169E1', '#6A5ACD', '#9932CC', '#FF1493', '#DC143C', '#A52A2A', '#556B2F', '#008080', '#228B22', '#2F4F4F', '#808080', '#D3D3D3', '#F5DEB3', '#000000', '#FF4500'])
+
+        // Normalize the data -> sum of each group must be 100!
+        // console.log(myArray)
+        dataNormalized = []
+        myArray.forEach(function (d) {
+            // Compute the total
+            tot = 0
+            for (i in subgroups) { 
+                // console.log(subgroups[i], d[subgroups[i]]);
+                name = subgroups[i]; 
+                tot += +d[name] }
+            // Now normalize
+            for (i in subgroups) { name = subgroups[i]; d[name] = d[name] / tot * 100 }
+        })
+
+        //stack the data? --> stack per subgroup
+        var stackedData = d3.stack()
+            .keys(subgroups)
+            (myArray)
+
+        // Show the bars
+        svg.append("g")
+            .selectAll("g")
+            // Enter in the stack data = loop key per key = group per group
+            .data(stackedData)
+            .enter().append("g")
+            .attr("fill", function (d) { 
+                // console.log(d.key);
+                return color(d.key); })
+            .selectAll("rect")
+            // enter a second time = loop subgroup per subgroup to add all rectangles
+            .data(function (d) { 
+                // console.log(d);
+                return d; })
+            .enter().append("rect")
+            .attr("x", function (d) { 
+                // console.log(d.data.Year);
+                return x(d.data.Year); })
+            .attr("y", function (d) { return y(d[1]); })
+            .attr("height", function (d) { return y(d[0]) - y(d[1]); })
+            .attr("width", x.bandwidth())
+    })
+
+</script>

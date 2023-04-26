@@ -21,6 +21,8 @@ function BubbleChart(data, {
     stroke, // a static stroke around the bubbles
     strokeWidth, // the stroke width around the bubbles, if any
     strokeOpacity, // the stroke opacity around the bubbles, if any
+    top10Diseases, // list of top 10 diseases
+    bottom6Diseases, // list of bottom 6 diseases
 } = {}) {
     // Compute the values.
     const D = d3.map(data, d => d);
@@ -66,30 +68,27 @@ function BubbleChart(data, {
         .attr("transform", d => `translate(${d.x},${d.y})`);
 
     leaf.append("circle")
-        .attr("id", (d, i) => `bubble-${i.data}`)
-        .attr("stroke", stroke)
+        .attr("id", (d, i) => {
+            return `bubble-${i}`
+        })
+        .attr("stroke", G ? d => color(G[d.data]) : fill == null ? "none" : fill)
         .attr("stroke-width", strokeWidth)
         .attr("stroke-opacity", strokeOpacity)
         .attr("fill", G ? d => color(G[d.data]) : fill == null ? "none" : fill)
         .attr("fill-opacity", fillOpacity)
         .attr("r", d => d.r)
-        .on("mouseover", function(d, i, n) {
-
+        .on("mouseover", function(d, i) {
+            console.log('this', this.attributes.id);
             console.log('d', d);
             console.log('i', i);
-            console.log('n', n);
             // decrease opacity of all other circles with 1s transition
             transitionOpacity(d3.selectAll("circle").filter(function(d) {
                 return d.data !== i.data;
             }), 0.5, 500);
             
             // tippy
-            tippy(`#bubble-${i.data}`, {
-                content: `${d.name}
-                <br>
-                ${d.value}`,
-                allowHTML: true,
-                placement: 'right'
+            tippy(`#bubble-${this.attributes.id.value}`, {
+                content: "Hello, world!"
             });
         })
         .on("mouseout", function(d) {
@@ -98,38 +97,41 @@ function BubbleChart(data, {
         });
 
     if (T) leaf.append("title")
-        .text(d => T[d.data]);
+        .text(d => T[d.data])
+        .attr("background-color", "white");
 
     if (L) {
-        // A unique identifier for clip paths (to avoid conflicts).
-        const uid = `O-${Math.random().toString(16).slice(2)}`;
-
-        leaf.append("clipPath")
-            .attr("id", d => `${uid}-clip-${d.data}`)
-            .append("circle")
-            .attr("r", d => d.r);
-
         leaf.append("text")
-            .attr("clip-path", d => `url(${new URL(`#${uid}-clip-${d.data}`, location)})`)
             .selectAll("tspan")
             .data(d => `${L[d.data]}`.split(/\n/g))
             .join("tspan")
             .attr("x", 0)
             .attr("y", (d, i, D) => `${i - D.length / 2 + 0.85}em`)
             .attr("fill-opacity", (d, i, D) => i === D.length - 1 ? 0.7 : null)
-            .text(d => d);
+            .text(d => {
+                // increase font size for top 10 diseases
+
+                if (top10Diseases.includes(d)) {
+                    return d;
+                }
+                if (bottom6Diseases.includes(d)) {
+                    return '';
+                }
+                if (d.length > 15) {
+                    return d.slice(0, 15) + '...';
+                }
+                return d;
+            })
+            .attr("font-size", (d) => {
+                if (top10Diseases.includes(d)) {
+                    return 20;
+                }
+                return 15;
+            });
     }
 
     return Object.assign(svg.node(), { scales: { color } });
 }
-
-data = [
-    { "name": "A", "value": 1 },
-    { "name": "B", "value": 2 },
-    { "name": "C", "value": 3 },
-    { "name": "D", "value": 4 },
-    { "name": "E", "value": 5 },
-]
 
 const getData = async () => {
     const res = await d3.csv('https://raw.githubusercontent.com/Arnav-Negi/data-viz-project/main/data/cause_of_deaths.csv');
@@ -150,17 +152,31 @@ getData().then((data) => {
     });
     console.log(diseaseData);
 
+    // sort diseaseData by value
+    diseaseData.sort((a, b) => b.value - a.value);
+
+    // get top 10 disease names
+    const top10Diseases = diseaseData.slice(0, 10).map(disease => disease.name);
+
+    console.log(top10Diseases);
+
+    // get bottom 6 disease names
+    const bottom6Diseases = diseaseData.slice(-6).map(disease => disease.name);
+    // get bottom 6 disease values
+    const bottom6DiseasesValues = diseaseData.slice(-6).map(disease => disease.value);
+
     chart = BubbleChart(diseaseData, {
         value: d => d.value,
         group: d => d.name,
         label: d => `${d.name}\n${d.value.toLocaleString("en")}`,
-        stroke: "#000",
-        padding: 1,
-        strokeWidth: 1,
-        fillOpacity: 0.7,
-        width: 800,
-        height: 600,
-        title: d => `${d.name} - ${d.value.toLocaleString("en")}`,
+        padding: 5,
+        strokeWidth: 2,
+        fillOpacity: 0.6,
+        width: 1200,
+        height: 1200,
+        top10Diseases: top10Diseases,
+        bottom6Diseases: bottom6Diseases,
+        bottom6DiseasesValues: bottom6DiseasesValues
     });
 
     document.getElementById('chart').appendChild(chart);
