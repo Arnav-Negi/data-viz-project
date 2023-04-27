@@ -25,7 +25,6 @@ function StackedAreaChart(data, {
     yLabel, // a label for the y-axis
     colors = d3.schemeTableau10, // array of colors for z
 } = {}) {
-    console.log(data);
     // Compute values.
     const X = d3.map(data, x);
     const Y = d3.map(data, y);
@@ -131,10 +130,6 @@ const ageRanges = ['>70','50-69','15-49','5-14','<5']
 const dataArray = []
 
 function build(country) {
-
-    // const yMax =
-
-
     document.getElementById('chart').append(StackedAreaChart(dataArray.filter((d) => d.country === country), {
         x: (d) => d.year,
         y: (d) => d.deaths,
@@ -149,7 +144,7 @@ function build(country) {
 d3.csv('https://raw.githubusercontent.com/Arnav-Negi/data-viz-project/main/data/number-of-deaths-by-age-group.csv', (d) => {
     ageRanges.forEach((age) => {
         dataArray.push({
-            country: d.coutry,
+            country: d.country,
             year: +d.year,
             age: age,
             deaths: +d[age]
