@@ -10,10 +10,10 @@ function BubbleChart(data, {
     height = width, // outer height, in pixels
     padding = 3, // padding between circles
     margin = 1, // default margins
-    marginTop = margin, // top margin, in pixels
+    marginTop = 0, // top margin, in pixels
     marginRight = margin, // right margin, in pixels
     marginBottom = margin, // bottom margin, in pixels
-    marginLeft = margin, // left margin, in pixels
+    marginLeft = 0, // left margin, in pixels
     groups, // array of group names (the domain of the color scale)
     colors = d3.schemeTableau10, // an array of colors (for groups)
     fill = "#ccc", // a static fill color, if no group channel is specified
@@ -23,6 +23,7 @@ function BubbleChart(data, {
     strokeOpacity, // the stroke opacity around the bubbles, if any
     top10Diseases, // list of top 10 diseases
     bottom6Diseases, // list of bottom 6 diseases
+    totalData, // total data
 } = {}) {
     // Compute the values.
     const D = d3.map(data, d => d);
@@ -30,7 +31,8 @@ function BubbleChart(data, {
     const G = group == null ? null : d3.map(data, group);
     const I = d3.range(V.length).filter(i => V[i] > 0);
 
-    console.log('I', I);
+    // create a dispatch event for tooltip
+    const dispatch = d3.dispatch("showTooltip", "hideTooltip");
 
     // Unique the groups.
     if (G && groups === undefined) groups = I.map(i => G[i]);
@@ -41,6 +43,9 @@ function BubbleChart(data, {
 
     // Compute labels and titles.
     const L = label == null ? null : d3.map(data, label);
+
+    console.log('L', L);
+
     const T = title === undefined ? L : title == null ? null : d3.map(data, title);
 
     // Compute layout: create a 1-deep hierarchy, and pack it.
@@ -76,32 +81,56 @@ function BubbleChart(data, {
         .attr("stroke-opacity", strokeOpacity)
         .attr("fill", G ? d => color(G[d.data]) : fill == null ? "none" : fill)
         .attr("fill-opacity", fillOpacity)
-        .attr("r", d => d.r)
-        .on("mouseover", function(d, i) {
-            console.log('this', this.attributes.id);
-            console.log('d', d);
-            console.log('i', i);
-            // decrease opacity of all other circles with 1s transition
-            transitionOpacity(d3.selectAll("circle").filter(function(d) {
-                return d.data !== i.data;
-            }), 0.5, 500);
-            
-            // tippy
-            tippy(`#bubble-${this.attributes.id.value}`, {
-                content: "Hello, world!"
-            });
-        })
-        .on("mouseout", function(d) {
-            // reset opacity of all circles
-            transitionOpacity(d3.selectAll("circle"), 1, 500);
-        });
+        .attr("r", d => d.r);
 
-    if (T) leaf.append("title")
-        .text(d => T[d.data])
-        .attr("background-color", "white");
+    leaf.on("mouseover", function (d, i) {
+        console.log('this', d, i);
+        // get circle id    
+        const circleId = this.children[0].attributes.id.value;
+        console.log('circleId', circleId);
+        // decrease opacity of all other circles with 1s transition
+        transitionOpacity(d3.selectAll("circle").filter(function (d) {
+            return d.data !== i.data;
+        }), 0.5, 500);
+
+        // hide all other text with 1s transition
+        transitionOpacity(d3.selectAll(".bubble-text").filter(function (d) {
+            return d.data !== i.data;
+        }), 0.2, 500);
+
+        // get the text id  
+        const textId = this.children[1].attributes.id.value;
+        console.log('textId', textId);
+
+        // change font size of tspans inside text element
+        transitionFontSize(d3.selectAll(`#${textId} tspan`), 20, 500);
+    
+        textEl = d3.select(`#${textId}`)
+
+        console.log('textEl', textEl);
+
+        data = D.filter(function (d) {
+            return d.value === i.value;
+        })[0];
+
+        console.log('data', data);
+
+        dispatch.call("showTooltip", this, data, i);
+    });
+
+    leaf.on("mouseout", function (d) {
+        // reset opacity of all circles
+        transitionOpacity(d3.selectAll("circle"), 1, 500);
+        transitionOpacity(d3.selectAll(".bubble-text"), 1, 500);
+        transitionFontSize(d3.selectAll("tspan"), 12, 500);
+    })
 
     if (L) {
         leaf.append("text")
+            .attr("id", (d, i) => {
+                return `text-${i}`
+            })
+            .attr("class", "bubble-text")
             .selectAll("tspan")
             .data(d => `${L[d.data]}`.split(/\n/g))
             .join("tspan")
@@ -110,25 +139,60 @@ function BubbleChart(data, {
             .attr("fill-opacity", (d, i, D) => i === D.length - 1 ? 0.7 : null)
             .text(d => {
                 // increase font size for top 10 diseases
-
                 if (top10Diseases.includes(d)) {
                     return d;
                 }
-                if (bottom6Diseases.includes(d)) {
-                    return '';
-                }
-                if (d.length > 15) {
-                    return d.slice(0, 15) + '...';
+                if (d.length > 12) {
+                    return d.slice(0, 12) + '...';
                 }
                 return d;
             })
-            .attr("font-size", (d) => {
-                if (top10Diseases.includes(d)) {
-                    return 20;
-                }
-                return 15;
-            });
+            .attr("font-size", 12)
     }
+
+
+    const tooltip = svg.append("g")
+    .attr("id", "tooltip")
+    .attr("transform", `translate(${width/4}, ${height - margin + 10})`)
+
+    tooltip.append("rect")
+    .attr("width", 250)
+    .attr("height", 75)
+    .attr("fill", "white")
+    .attr("stroke", "black")
+    .attr("stroke-width", 1)
+
+
+    // dispatch event definition
+    dispatch.on("showTooltip", function (d) {
+        console.log('d', d);
+
+        d3.select("#tooltipRect")
+        .remove();
+
+        // add this to a new tooltip component in the bottom center of the svg
+        const tooltipRect = tooltip.append("g")
+        .attr("id", "tooltipRect")
+
+        tooltipRect.append("text")
+        .attr("x", 125)
+        .attr("y", 25)
+        .attr("fill", "black")
+        .attr("font-size", 15)
+        .text(d.name);
+
+        // add commas to the value
+        const value = d.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+        tooltipRect.append("text")
+        .attr("x", 125)
+        .attr("y", 50)
+        .attr("fill", "black")
+        .attr("font-size", 15)
+        .attr('opacity', 0.7)
+        .text(value);
+
+    });
 
     return Object.assign(svg.node(), { scales: { color } });
 }
@@ -148,9 +212,25 @@ getData().then((data) => {
         data.forEach(row => {
             total += +row[disease];
         });
-        return {name: disease, value: total};
+        return { name: disease, value: total };
     });
     console.log(diseaseData);
+
+    // create a more detailed onject with name as disease, and deaths for each year
+    expandedDiseaseData = diseases.map(disease => {
+        let total = 0;
+        let deaths = {};
+        for (let i = 1990; i < 2020; i++) {
+            deaths[i] = 0;
+        }
+        data.forEach(row => {
+            total += +row[disease];
+            deaths[row.Year] += +row[disease];
+        });
+        return { name: disease, value: total, deaths: deaths };
+    });
+
+    console.log(expandedDiseaseData);
 
     // sort diseaseData by value
     diseaseData.sort((a, b) => b.value - a.value);
@@ -162,8 +242,6 @@ getData().then((data) => {
 
     // get bottom 6 disease names
     const bottom6Diseases = diseaseData.slice(-6).map(disease => disease.name);
-    // get bottom 6 disease values
-    const bottom6DiseasesValues = diseaseData.slice(-6).map(disease => disease.value);
 
     chart = BubbleChart(diseaseData, {
         value: d => d.value,
@@ -172,11 +250,11 @@ getData().then((data) => {
         padding: 5,
         strokeWidth: 2,
         fillOpacity: 0.6,
-        width: 1200,
-        height: 1200,
+        width: 1000,
         top10Diseases: top10Diseases,
         bottom6Diseases: bottom6Diseases,
-        bottom6DiseasesValues: bottom6DiseasesValues
+        margin: 300,
+        totalData: expandedDiseaseData
     });
 
     document.getElementById('chart').appendChild(chart);
@@ -188,6 +266,8 @@ function transitionOpacity(selection, opacity, duration) {
         .style("opacity", opacity);
 }
 
-function resetOpacity(selection) {
-    selection.style("opacity", 1);
+function transitionFontSize(selection, fontSize, duration) {
+    selection.transition()
+        .duration(duration)
+        .attr("font-size", fontSize);
 }
