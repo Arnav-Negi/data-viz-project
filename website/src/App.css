@@ -1,0 +1,14 @@
+body, html {
+    background-color: rgba(220, 220, 220, 0.8);
+    color: #494949;
+}
+
+h1 {
+    text-align: center;
+}
+
+
+h3, p {
+    transform: translate(10%);
+    max-width: 80%;
+}
