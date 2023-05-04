@@ -5,7 +5,7 @@ function StackedAreaChart(data, {
     x = ([x]) => x, // given d in data, returns the (ordinal) x-value
     y = ([, y]) => y, // given d in data, returns the (quantitative) y-value
     z = () => 1, // given d in data, returns the (categorical) z-value
-    marginTop = 20, // top margin, in pixels
+    marginTop = 30, // top margin, in pixels
     marginRight = 30, // right margin, in pixels
     marginBottom = 150, // bottom margin, in pixels
     marginLeft = 70, // left margin, in pixels
@@ -51,8 +51,11 @@ function StackedAreaChart(data, {
         (d3.rollup(I, ([i]) => i, i => X[i], i => Z[i]))
         .map(s => s.map(d => Object.assign(d, {i: d.data[1].get(s.key)})));
 
+    console.log(data);
+
     // Compute the default y-domain. Note: diverging stacks can be negative.
     if (yDomain === undefined) yDomain = d3.extent(series.flat(2));
+    yDomain[1] *= 1.1;
 
     // Construct scales and axes.
     const xScale = xType(xDomain, xRange);
@@ -112,33 +115,50 @@ function StackedAreaChart(data, {
 
     // Legend
     const legend = svg.append("g")
-        .attr("transform", `translate(${width - marginRight - 200}, 0)`)
-        .attr("font-family", "sans-serif")
-        .attr("font-size", 10)
         .selectAll("g")
         .data(zDomain)
-        .join("g")
-        .attr("transform", (d, i) => `translate(0,${i * 20})`)
         .join('rect')
+        .attr('x', (d, i) => marginLeft + i * 150)
+        .attr('y', height - 2 * marginBottom / 3)
+        .attr('width', 30)
+        .attr('height', 30)
+        .attr("fill", (d, i) => color(d))
+        .attr('opacity', 0.8);
 
 
+    const legendText = svg.append("g")
+        .attr("font-family", "sans-serif")
+        .attr("font-size", 12)
+        .selectAll("g")
+        .data(zDomain)
+        .join('text')
+        .attr('x', (d, i) => i * 150 + marginLeft + 40)
+        .attr('y', height - 2 * marginBottom /3 + 20)
+        .text(d => d + ' years')
+        .attr("fill", (d,  i) => color(d));
 
     return Object.assign(svg.node(), {scales: {color}});
 }
 
 const ageRanges = ['>70','50-69','15-49','5-14','<5']
 const dataArray = []
+const countries = new Set();
 
 function build(country) {
-    document.getElementById('chart').append(StackedAreaChart(dataArray.filter((d) => d.country === country), {
+    const chart = document.getElementById('chart');
+    chart.innerHTML = '';
+    chart.append(StackedAreaChart(dataArray.filter((d) => d.country === country), {
         x: (d) => d.year,
         y: (d) => d.deaths,
         z: (d) => d.age,
         xType: d3.scaleLinear,
         xFormat: d3.format("d"),
         yLabel: 'DALYs',
-        // yDomain: [0, yMax],
     }));
+}
+
+function buildHelper(selectObject) {
+    build(selectObject.value);
 }
 
 d3.csv('https://raw.githubusercontent.com/Arnav-Negi/data-viz-project/main/data/number-of-deaths-by-age-group.csv', (d) => {
@@ -150,8 +170,20 @@ d3.csv('https://raw.githubusercontent.com/Arnav-Negi/data-viz-project/main/data/
             deaths: +d[age]
         })
     });
+
+    countries.add(d.country);
 }).then(
     (data) => {
+        // add select options
+        const element = document.getElementById('select');
+
+        countries.forEach(country => {
+            const option = document.createElement('option')
+            option.value = country;
+            option.text = country;
+            element.appendChild(option);
+        })
+
         build('India');
     }
 )
