@@ -156,7 +156,8 @@ function IndexChart(data, {
     return Object.assign(svg.node(), {scales: {color}, update});
 }
 
-const countries = ['India', 'United States', 'United Kingdom', 'Japan', 'United Arab Emirates', 'Canada', 'Germany']
+const countries = ['India', 'United States', 'United Kingdom', 'Japan', 'United Arab Emirates', 'Canada', 'Germany',
+'South Korea', 'Russia', 'Australia', 'Israel']
 const dataArray = []
 
 const cause = 'self_harm'
@@ -169,7 +170,7 @@ function build() {
         z: (d) => d.country,
         xType: d3.scaleLinear,
         xFormat: d3.format("d"),
-        yLabel: cause,
+        yLabel: 'Suicides (log scale)',
         zDomain: countries,
     }));
 }
