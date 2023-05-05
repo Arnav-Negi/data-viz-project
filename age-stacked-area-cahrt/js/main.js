@@ -73,7 +73,12 @@ function StackedAreaChart(data, {
         .attr("width", width)
         .attr("height", height)
         .attr("viewBox", [0, 0, width, height])
-        .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+        .attr("style", "max-width: 100%; height: auto; height: intrinsic;")
+        .style("-webkit-tap-highlight-color", "transparent")
+        .style("overflow", "visible")
+        .on("pointerenter pointermove", pointermoved)
+        .on("pointerleave", pointerleft)
+        .on("touchstart", event => event.preventDefault());
 
     svg.append("g")
         .attr("transform", `translate(${marginLeft},0)`)
@@ -136,6 +141,51 @@ function StackedAreaChart(data, {
         .attr('y', height - 2 * marginBottom /3 + 20)
         .text(d => d + ' years')
         .attr("fill", (d,  i) => color(d));
+
+    const title = (i) => {
+        return `age range: ${Z[i]}\n` +
+            `DALY: ${Y[i]}\n` +
+            `year: ${X[i]}`;
+    }
+
+    // Tooltip
+    const tooltip = svg.append("g")
+        .style("pointer-events", "none");
+
+    function pointermoved(event) {
+        const i = d3.bisectCenter(X, xScale.invert(d3.pointer(event)[0]));
+        tooltip.style("display", null);
+        tooltip.attr("transform", `translate(${xScale(X[i])},${d3.pointer(event)[1]})`);
+
+        const path = tooltip.selectAll("path")
+            .data([,])
+            .join("path")
+            .attr("fill", "white")
+            .attr("stroke", "black");
+
+        const text = tooltip.selectAll("text")
+            .data([,])
+            .join("text")
+            .call(text => text
+                .selectAll("tspan")
+                .data(`${title(i)}`.split(/\n/))
+                .join("tspan")
+                .attr("x", 0)
+                .attr("y", (_, i) => `${i * 1.1}em`)
+                .attr("font-weight", (_, i) => i ? null : "bold")
+                .text(d => d));
+
+        const {x, y, width: w, height: h} = text.node().getBBox();
+        text.attr("transform", `translate(${-w / 2},${15 - y})`);
+        path.attr("d", `M${-w / 2 - 10},5H-5l5,-5l5,5H${w / 2 + 10}v${h + 20}h-${w + 20}z`);
+        svg.property("value", O[i]).dispatch("input", {bubbles: true});
+    }
+
+    function pointerleft() {
+        tooltip.style("display", "none");
+        svg.node().value = null;
+        svg.dispatch("input", {bubbles: true});
+    }
 
     return Object.assign(svg.node(), {scales: {color}});
 }
