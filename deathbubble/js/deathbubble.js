@@ -11,7 +11,7 @@ function BubbleChart(data, {
     padding = 3, // padding between circles
     margin = 1, // default margins
     marginTop = 0, // top margin, in pixels
-    marginRight = margin, // right margin, in pixels
+    marginRight = 0, // right margin, in pixels
     marginBottom = margin, // bottom margin, in pixels
     marginLeft = 0, // left margin, in pixels
     groups, // array of group names (the domain of the color scale)
@@ -153,10 +153,10 @@ function BubbleChart(data, {
 
     const tooltip = svg.append("g")
     .attr("id", "tooltip")
-    .attr("transform", `translate(${width/4}, ${height - margin + 10})`)
+    .attr("transform", `translate(${width/2 - margin/2}, ${height - margin + 10})`)
 
     tooltip.append("rect")
-    .attr("width", 250)
+    .attr("width", 300)
     .attr("height", 75)
     .attr("fill", "white")
     .attr("stroke", "black")
@@ -175,7 +175,7 @@ function BubbleChart(data, {
         .attr("id", "tooltipRect")
 
         tooltipRect.append("text")
-        .attr("x", 125)
+        .attr("x", 150)
         .attr("y", 25)
         .attr("fill", "black")
         .attr("font-size", 15)
@@ -185,7 +185,7 @@ function BubbleChart(data, {
         const value = d.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
         tooltipRect.append("text")
-        .attr("x", 125)
+        .attr("x", 150)
         .attr("y", 50)
         .attr("fill", "black")
         .attr("font-size", 15)

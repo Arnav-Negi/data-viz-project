@@ -15,6 +15,14 @@ getData().then((data) => {
         d.total_deaths = +d.total_deaths;
     });
 
+    continents = ["Africa", "Asia", "Europe", "North America", "Oceania", "South America"];
+
+    // remove data for "world"
+    data = data.filter(d => d.country != "World");
+
+    // get countries starting with r
+    console.log(data.filter(d => d.country.startsWith("R")));
+
     years = d3.extent(data, d => d.year);
     console.log("years:", years);
 
@@ -25,8 +33,8 @@ getData().then((data) => {
     });
 
     height = 600;
-    width = 800;
-    margin = ({ top: 20, right: 20, bottom: 20, left: 50 });
+    width = 1000;
+    margin = ({ top: 20, right: 200, bottom: 20, left: 50 });
 
     const yearFilter = Scrubber(
         d3.range(years[0], years[1] + 1, 1),
@@ -40,7 +48,7 @@ getData().then((data) => {
     const output = yearFilter._groups[0][0][2];
     let yearToDisplay = output.value;
     console.log(typeof yearToDisplay);
-    
+
 
     x = d3.scaleLog()
         .domain(d3.extent(data.filter(d => d.year == yearToDisplay), d => d.gdp))
@@ -56,12 +64,20 @@ getData().then((data) => {
         .domain(data.filter(d => d.year == yearToDisplay).map(d => d.continent))
         .range(d3.schemeTableau10);
 
+    // generate colors for continents
+    colorContinents = {};
+    continents.forEach((c) => {
+        colorContinents[c] = color(c);
+    });
+
+    console.log("colorContinents:", colorContinents);
+
     death_extent = d3.extent(data.filter(d => d.year == yearToDisplay), d => d.total_deaths)
     console.log("death_extent:", death_extent);
 
     size = d3.scaleSqrt()
         .domain(death_extent)
-        .range([4, 35]);
+        .range([3, 25]);
 
     // append to dom
     const yearScrubber = document.getElementById('scrubber');
@@ -71,24 +87,22 @@ getData().then((data) => {
     yearFilter.node().addEventListener('input', () => {
         // get the value from the form element
         yearToDisplay = output.value;
-        console.log(typeof yearToDisplay);
-        console.log(output.value == 1991);
 
         // update scales
         x = d3.scaleLog()
             .domain(d3.extent(data.filter(d => d.year == yearToDisplay), d => d.gdp))
             .range([margin.left, width - margin.right])
             .nice();
-        
+
         y = d3.scaleLog()
             .domain(d3.extent(data.filter(d => d.year == yearToDisplay), d => d.exp))
             .range([height - margin.bottom, margin.top])
             .nice();
-            
+
         size = d3.scaleSqrt()
             .domain(d3.extent(data.filter(d => d.year == yearToDisplay), d => d.total_deaths))
-            .range([4, 35]);
-        
+            .range([2, 25]);
+
     });
 
     const graph = () => {
@@ -151,7 +165,6 @@ getData().then((data) => {
             yearLabel.text(yearToDisplay);
             console.log(yearToDisplay);
             newData = data.filter(d => {
-                console.log(d.year)
                 return d.year == yearToDisplay
             });
         });
@@ -163,38 +176,367 @@ getData().then((data) => {
             .join("circle")
             .sort((a, b) => b.total_deaths - a.total_deaths)
             .attr('class', 'country')
+            .attr('id', d => d.code)
             .attr('opacity', 0.7)
             .attr("cx", d => x(d.gdp))
             .attr("cy", d => y(d.exp))
             .attr("r", d => size(d.total_deaths))
-            .attr("fill", d => color(d.continent))
+            .attr("fill", d => colorContinents[d.continent])
+            .attr("stroke", d => d3.color(colorContinents[d.continent]).darker())
 
         // update circles on scrubber change
         yearFilter.node().addEventListener('input', () => {
             // transition circles
             svg.selectAll('.country')
-                .data(data.filter(d => d.year == yearToDisplay))
+                .data(data.filter(d => {
+                    console.log(d.country);
+                    return d.year == yearToDisplay
+                }
+                ))
+                .sort((a, b) => b.total_deaths - a.total_deaths)
                 .transition()
                 .duration(1000)
+                .attr('id', d => d.code)
                 .attr("cx", d => x(d.gdp))
                 .attr("cy", d => y(d.exp))
                 .attr("r", d => size(d.total_deaths))
-                .attr("fill", d => color(d.continent))
-
+                .attr("fill", d => colorContinents[d.continent])
+                .attr("stroke", d => d3.color(colorContinents[d.continent]).darker())
         });
 
-        // add country labels
-        countries
-            .append('title')
-            .text(d => d.country);
+        country_click = false
 
         countries
             .on('mouseover', function () {
-                d3.select(this).attr('stroke', '#333').attr('stroke-width', 2);
+                if(country_click){
+                    return;
+                }
+
+                d3.select(this).attr('stroke', '#333')
+                d3.select(this).attr('opacity', 1)
+                // get country data
+                const d = data.filter(d => d.code == this.id)[0];
+
+                // add data to tooltip
+                two_lines = false
+                tooltip.append('text')
+                    .attr('class', 'country-name')
+                    .attr('x', 10)
+                    .attr('y', 20)
+                    .attr('font-size', '18px')
+                    .attr('font-weight', 'bold')
+                    .text(() => {
+                        // if too long, shorten
+                        if (d.country.length > 15) {
+                            two_lines = true
+                            return d.country.substring(0, 14) + '-';
+                        }
+
+                        return d.country;
+                    });
+
+                if (two_lines) {
+                    tooltip.append('text')
+                        .attr('class', 'country-name')
+                        .attr('x', 10)
+                        .attr('y', 35)
+                        .attr('font-size', '18px')
+                        .attr('font-weight', 'bold')
+                        .text(d.country.substring(14));
+                }
+
+                // add data to tooltip: heading in one line and data in another
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 60)
+                    .attr('font-size', '14px')
+                    .attr('font-weight', 'bold')
+                    .text("GDP per capita:");
+
+                // get data to two decimal places
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 75)
+                    .attr('font-size', '14px')
+                    .text(`$${d.gdp.toFixed(2)}`);
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 100)
+                    .attr('font-size', '14px')
+                    .attr('font-weight', 'bold')
+                    .text("Health expenditure:");
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 115)
+                    .attr('font-size', '14px')
+                    .text(`$${d.exp.toFixed(2)}`);
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 140)
+                    .attr('font-size', '14px')
+                    .attr('font-weight', 'bold')
+                    .text("Total deaths:");
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 155)
+                    .attr('font-size', '14px')
+                    .text(`${d.total_deaths}`);
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 180)
+                    .attr('font-size', '14px')
+                    .attr('font-weight', 'bold')
+                    .text("Continent:");
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 195)
+                    .attr('font-size', '14px')
+                    .text(`${d.continent}`);
+
+
+
             })
             .on('mouseout', function () {
-                d3.select(this).attr('stroke', null);
+
+                if (country_click) {
+                    return;
+                }
+
+                if (clickLegend) {
+
+                    // reset stroke
+                    d3.select(this).attr('stroke', d => d3.color(colorContinents[d.continent]).darker())
+
+                    // remove tooltip text
+                    tooltip.selectAll('text').remove();
+
+                    if (codesToHighlight.includes(this.id)) {
+                        d3.select(this).attr('opacity', 0.7)
+                        return;
+                    }
+
+                    d3.select(this).attr('opacity', 0.1)
+                    return;
+                }
+
+                d3.select(this).attr('opacity', 0.7)
+                // reset stroke
+                d3.select(this).attr('stroke', d => d3.color(colorContinents[d.continent]).darker())
+
+                // remove tooltip text
+                tooltip.selectAll('text').remove();
+            })
+            .on('click', function () {
+                if (clickLegend) {
+                    clickLegend = false
+                }
+
+                // if already clicked, reset
+                if (country_click) {
+                    country_click = false
+                    d3.select(this).attr('stroke', d => d3.color(colorContinents[d.continent]).darker())
+                    countries.transition().duration(500).attr('opacity', 0.7)
+
+                    tooltip.selectAll('text').remove();
+
+                    return;
+                }
+
+                country_click = true
+                d3.select(this).attr('stroke', '#333')
+
+                // set opacity of all other countries to 0.1
+                countries.transition().duration(500).attr('opacity', 0.1)
+                d3.select(this).transition().duration(500).attr('opacity', 1)
+
+
+                const d = data.filter(d => d.code == this.id)[0];
+
+                // add data to tooltip
+                two_lines = false
+                tooltip.append('text')
+                    .attr('class', 'country-name')
+                    .attr('x', 10)
+                    .attr('y', 20)
+                    .attr('font-size', '18px')
+                    .attr('font-weight', 'bold')
+                    .text(() => {
+                        // if too long, shorten
+                        if (d.country.length > 15) {
+                            two_lines = true
+                            return d.country.substring(0, 14) + '-';
+                        }
+
+                        return d.country;
+                    });
+
+                if (two_lines) {
+                    tooltip.append('text')
+                        .attr('class', 'country-name')
+                        .attr('x', 10)
+                        .attr('y', 35)
+                        .attr('font-size', '18px')
+                        .attr('font-weight', 'bold')
+                        .text(d.country.substring(14));
+                }
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 60)
+                    .attr('font-size', '14px')
+                    .attr('font-weight', 'bold')
+                    .text("GDP per capita:");
+
+                // get data to two decimal places
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 75)
+                    .attr('font-size', '14px')
+                    .text(`$${d.gdp.toFixed(2)}`);
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 100)
+                    .attr('font-size', '14px')
+                    .attr('font-weight', 'bold')
+                    .text("Health expenditure:");
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 115)
+                    .attr('font-size', '14px')
+                    .text(`$${d.exp.toFixed(2)}`);
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 140)
+                    .attr('font-size', '14px')
+                    .attr('font-weight', 'bold')
+                    .text("Total deaths:");
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 155)
+                    .attr('font-size', '14px')
+                    .text(`${d.total_deaths}`);
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 180)
+                    .attr('font-size', '14px')
+                    .attr('font-weight', 'bold')
+                    .text("Continent:");
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 195)
+                    .attr('font-size', '14px')
+                    .text(`${d.continent}`);
             });
+
+        // create a tooltip for countires being hovered over below the legend
+        const tooltip = svg.append('g')
+            .attr('class', 'tooltip')
+            .attr('transform', `translate(${width - margin.right + 20}, ${margin.top + 150})`)
+
+        tooltip.append('rect')
+            .attr('width', 150)
+            .attr('height', 210)
+            .attr('fill', '#fff')
+            .attr('stroke', '#333')
+
+        countriesToHighlight = []
+        codesToHighlight = []
+
+        legendData = []
+        continents.forEach((continent) => {
+            legendData.push({
+                continent: continent,
+                color: color(continent)
+            });
+        });
+
+        // create interactive legend
+        const legend = svg.append('g')
+            .attr('transform', `translate(${width - margin.right + 20}, ${margin.top + 20})`)
+            .selectAll('.legend')
+            .data(legendData)
+            .join('g')
+            .attr('class', 'legend')
+            .attr('id', d => d.continent)
+            .attr('cursor', 'pointer')
+
+        legend.append('rect')
+            .attr('x', 0)
+            .attr('y', (d, i) => i * 20)
+            .attr('width', 15)
+            .attr('height', 15)
+            .attr('fill', d => d.color)
+            .attr('opacity', 0.7)
+
+        legend.append('text')
+            .attr('x', 20)
+            .attr('y', (d, i) => i * 20 + 12)
+            .attr('font-size', 12)
+            .text(d => d.continent)
+
+        clickLegend = false;
+
+        legend.on('click', function () {
+            console.log(this);
+            // make pointer cursor
+            if (clickLegend == false) {
+                // highlight countries of selected continent with transition
+                countriesToHighlight = data.filter(d => d.continent == this.id);
+                // get codes of countries to highlight
+                codesToHighlight = countriesToHighlight.map(d => d.code);
+
+                // highlight countries
+                svg.selectAll('.country')
+                    .transition()
+                    .duration(500)
+                    .attr('opacity', d => {
+                        if (codesToHighlight.includes(d.code)) {
+                            return 0.8;
+                        } else {
+                            return 0.1;
+                        }
+                    }
+                    )
+
+                clickLegend = true;
+            }
+            else {
+                svg.selectAll('.country')
+                    .transition()
+                    .duration(500)
+                    .attr('opacity', 0.7)
+
+                clickLegend = false;
+            }
+        })
 
         return svg.node();
     }
