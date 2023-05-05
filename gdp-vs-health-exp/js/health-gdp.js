@@ -185,13 +185,12 @@ getData().then((data) => {
 
         // update circles on scrubber change
         yearFilter.node().addEventListener('input', () => {
-            // transition circles
+            // transition circles but each circle should map to the same country
             svg.selectAll('.country')
                 .data(data.filter(d => {
-                    console.log(d.country);
                     return d.year == yearToDisplay
                 }
-                ))
+                ), d => d.code)
                 .sort((a, b) => b.total_deaths - a.total_deaths)
                 .transition()
                 .duration(1000)
