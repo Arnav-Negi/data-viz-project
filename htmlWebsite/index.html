@@ -14,53 +14,85 @@
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+          integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
     <link href="./css/styles.css" rel="stylesheet">
     <title>Burden of Disease</title>
 </head>
 
 <body>
-    <div class="container-fluid p-0">
-        <div class="row m-0">
-            <nav class="col-1 p-0">
+<div class="container-fluid p-0">
+    <div class="row m-0">
+        <nav class="col-1 p-0">
 
-            </nav>
-            <div class="col-11 mr-0 p-0">
-                <div class="container-fluid">
-                    <div class="row justify-content-center">
-                        <div class="col-6 text-center">
-                            <h1 class="display-4">Burden of Disease & Death</h1>
-                            <p>introduction</p>
-                        </div>
+        </nav>
+        <div class="col-11 mr-0 p-0">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-6 text-center">
+                        <h1 class="display-4">Burden of Disease & Death</h1>
+                        <p>introduction</p>
                     </div>
-                    <div class="row graph1">
-                        <div id="db_chart" class="col-8 graph">
-                        </div>
-                        <div class="col-4">
-                            <h1 class="display-6">Total Deaths by Cause</h1>
-                            <p>definition</p>
-                        </div>
+                </div>
+                <div class="row graph1">
+                    <div id="db_chart" class="col-8 graph">
                     </div>
-                    <div class="row graph2">
-                        <div class="col-4">
-                            <h2>What is Burden of Disease?</h2>
-                            <p>definition</p>
-                        </div>
-                        <div class="col-8 graph">
-                            <div id="scrubber" class="mb-4"></div>
-                            <div id="gdp_chart" class="m-5"></div>
-                        </div>
+                    <div class="col-4">
+                        <h1 class="display-6">Total Deaths by Cause</h1>
+                        <p>definition</p>
                     </div>
+                </div>
+                <div class="row graph2">
+                    <div class="col-4">
+                        <h2>What is Burden of Disease?</h2>
+                        <p>definition</p>
+                    </div>
+                    <div class="col-8 graph">
+                        <div id="scrubber" class="mb-4"></div>
+                        <div id="gdp_chart" class="m-5"></div>
+                    </div>
+                </div>
+<!--                Terrorism Bar Chart-->
+                <div class="row terror">
+                    <h1 style="font-family: 'Helvetica', 'Arial', sans-serif;transform: translate(500px, 70px)">Conflict
+                        and Terrorism (no. of deaths for that year)</h1>
+                    <button onclick="play()"
+                            style="font-family: 'Helvetica', 'Arial', sans-serif;transform: translate(400px, 80px);max-width: 100px"
+                            type="button">Replay
+                    </button>
+                    <div id="terror_chart" class="m-5"
+                         style="width: 100%;height: 100%;z-index: -1;display: flex;justify-content: center;place-items: center;"></div>
+                </div>
+<!--                                Age Stacked Area Chart-->
+                <div class="row age">
+                    <div class="col-4">
+                        <h2>Age Distribution of Deaths</h2>
+                        <p>definition</p>
+                    </div>
+                    <div class="col-8 graph">
+                        <select id="select" onchange="buildHelper(this)" style="transform: translate(200px, 30px)">
+                        </select>
+                        <div id="age_chart" class="m-5"
+                             style="width: 100%;height: 100%;z-index: -1;display: flex;justify-content: center;place-items: center;"></div>
+                    </div>
+                </div>
+<!--                Suicide Indexed Line Chart-->
+                <div class="row suicide">
+                    <div id="suicide_chart" class="m-5"
+                         style="width: 100%;height: 100%;z-index: -1;display: flex;justify-content: center;place-items: center;"></div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="js/deathbubble.js"></script>
-    <script src="js/health-gdp.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+<script src="js/deathbubble.js"></script>
+<script src="js/health-gdp.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
 </body>
-
+<script src="js/terror-bar-race.js"></script>
+<script src="js/age-stacked-area.js"></script>
+<script src="js/suicide-line.js"></script>
 </html>
