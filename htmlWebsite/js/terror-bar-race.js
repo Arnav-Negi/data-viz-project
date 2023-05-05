@@ -12,21 +12,21 @@ const k = 20;
 
 const barSize = 45;
 
-let margin = {
+let marginTerror = {
     top: 100,
     left: 50,
     right: 30,
     bottom: 0
 }
 
-let width = 1200 - margin.left - margin.right;
+let widthTerror = 1200 - marginTerror.left - marginTerror.right;
 
 
 let ready = false;
 
 const xScale = d3.scaleLinear()
     .domain([0, 40000])
-    .rangeRound([0, width]);
+    .rangeRound([0, widthTerror]);
 
 const yScale = d3.scaleBand()
     .domain(d3.range(n + 1))
@@ -35,14 +35,14 @@ const yScale = d3.scaleBand()
 
 const heightChart = barSize * n;
 
-const svg = d3.select('#terror_chart')
+const svgTerror = d3.select('#terror_chart')
     .append('svg')
-    .attr('height', heightChart + margin.top + margin.bottom)
-    .attr('width', width + margin.left + margin.right)
+    .attr('height', heightChart + marginTerror.top + marginTerror.bottom)
+    .attr('width', widthTerror + marginTerror.left + marginTerror.right)
     .attr('class', 'chart')
     .attr('id', 'chart')
     .append('g')
-    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+    .attr('transform', 'translate(' + marginTerror.left + ',' + marginTerror.top + ')')
 
 
 let color = d3.scaleOrdinal();
@@ -51,11 +51,11 @@ const keyframes = [];
 let prev, next;
 
 // Initialise chart
-let bars = svg.append('g')
+let bars = svgTerror.append('g')
     .attr('fill-opacity', 0.8)
     .selectAll('rect');
 
-let labels = svg.append("g")
+let labels = svgTerror.append("g")
     .attr('class', 'countryLabels')
     .style("font", "bold 15px \"Helvetica Neue\", Helvetica, Arial, sans-serif")
     .style("font-variant-numeric", "tabular-nums")
@@ -63,31 +63,31 @@ let labels = svg.append("g")
     .selectAll("text");
 
 let axis = d3.axisTop(xScale)
-    .ticks(width / 160)
+    .ticks(widthTerror / 160)
     .tickSizeOuter(0)
     .tickSizeInner(-barSize * (n + yScale.padding()));
 
-let g = svg.append("g")
+let g = svgTerror.append("g")
 
-let counter = svg.append("text")
+let counter = svgTerror.append("text")
     .style("font", 'bold \"Helvetica Neue\", Helvetica, Arial, sans-serif')
     .style('font-size', '3em')
     .style("font-variant-numeric", "tabular-nums")
     .attr("text-anchor", "end")
-    .attr("x", width - 50)
+    .attr("x", widthTerror - 50)
     .attr("y", barSize * (n - 0.45))
     .attr("dy", "0.32em")
     .attr('stroke', 'black')
 
-let xAxisLabel = svg.append("text")
+let xAxisLabel = svgTerror.append("text")
     .style("font", 'bold \"Helvetica Neue\", Helvetica, Arial, sans-serif')
     .style('font-size', '1.5em')
     .style("font-variant-numeric", "tabular-nums")
-    .attr("x", width / 2 - 25)
+    .attr("x", widthTerror / 2 - 25)
     .attr("y", -30)
     .text("Deaths for this year")
 
-let yAxisLabel = svg.append("text")
+let yAxisLabel = svgTerror.append("text")
     .style("font", 'bold \"Helvetica Neue\", Helvetica, Arial, sans-serif')
     .style('font-size', '1.5em')
     .style("font-variant-numeric", "tabular-nums")
@@ -101,7 +101,7 @@ async function play() {
     if (!ready) return;
 
     for (const keyframe of keyframes) {
-        const transition = svg.transition()
+        const transition = svgTerror.transition()
             .duration(duration)
             .ease(d3.easeLinear);
 
@@ -109,11 +109,11 @@ async function play() {
         updateAxis(axis, transition);
 
         // bars
-        svg.selectAll('rect').remove();
+        svgTerror.selectAll('rect').remove();
         updateBars(bars, keyframe[1], transition);
 
         // labels
-        svg.selectAll('#countryLabels').remove();
+        svgTerror.selectAll('#countryLabels').remove();
         updateLabels(labels, keyframe[1], transition);
 
         // counter
@@ -158,9 +158,9 @@ function textTween(a, b) {
 }
 
 function updateLabels(labels, data, transition) {
-    const prevFunc = (d) => Math.min(xScale((prev.get(d) || d).value), width);
-    const nextFunc = (d) => Math.min(xScale((next.get(d) || d).value), width);
-    const curFunc = (d) => Math.min(xScale(d.value), width);
+    const prevFunc = (d) => Math.min(xScale((prev.get(d) || d).value), widthTerror);
+    const nextFunc = (d) => Math.min(xScale((next.get(d) || d).value), widthTerror);
+    const curFunc = (d) => Math.min(xScale(d.value), widthTerror);
 
     labels = labels.data(data.slice(0, n), d => d.name)
         .join(
@@ -268,6 +268,5 @@ d3.csv("https://raw.githubusercontent.com/Arnav-Negi/data-viz-project/main/data/
     next = new Map(nameframes.flatMap(([, data]) => d3.pairs(data)));
     ready = true;
     counter.text(keyframes[0][0].getUTCFullYear());
-    console.log(keyframes)
     play();
 });
