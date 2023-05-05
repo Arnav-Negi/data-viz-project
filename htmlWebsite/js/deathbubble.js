@@ -136,7 +136,7 @@ function BubbleChart(data, {
             .join("tspan")
             .attr("x", 0)
             .attr("y", (d, i, D) => `${i - D.length / 2 + 0.85}em`)
-            .attr("fill-opacity", (d, i, D) => i === D.length - 1 ? 0.9 : null)
+            .attr("fill-opacity", (d, i, D) => i === D.length - 1 ? 0.7 : null)
             .text(d => {
                 // increase font size for top 10 diseases
                 if (top10Diseases.includes(d)) {
@@ -153,7 +153,7 @@ function BubbleChart(data, {
 
     const tooltip = svg.append("g")
     .attr("id", "tooltip")
-    .attr("transform", `translate(${width/2 - margin/2}, ${height - margin + 10})`)
+    .attr("transform", `translate(${width - margin - 250}, ${height - margin + 10})`)
 
     const rect = tooltip.append("rect")
     .attr("width", 300)
@@ -163,9 +163,6 @@ function BubbleChart(data, {
     .attr("opacity", 0.4)
     .attr("rx", 10)
     .attr("ry", 10);
-
-    
-
 
     // dispatch event definition
     dispatch.on("showTooltip", function (d, i) {
@@ -254,10 +251,10 @@ getData().then((data) => {
         padding: 5,
         strokeWidth: 2,
         fillOpacity: 0.6,
-        width: 1000,
+        width: 900,
         top10Diseases: top10Diseases,
         bottom6Diseases: bottom6Diseases,
-        margin: 300,
+        margin: 150,
         totalData: expandedDiseaseData
     });
 
