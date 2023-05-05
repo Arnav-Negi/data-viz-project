@@ -133,9 +133,9 @@ getData().then((data) => {
             .attr('fill', 'black')
             .attr('font-size', '12px')
             .attr('font-weight', 'bold')
-            .attr('x', 90)
+            .attr('x', 150)
             .attr('y', 10)
-            .text('Health Expenditure (%)');
+            .text('Health Expenditure per capita ($)');
 
         // update axes on scrubber change
         yearFilter.node().addEventListener('input', () => {
@@ -174,7 +174,6 @@ getData().then((data) => {
             .selectAll("circle")
             .data(data.filter(d => d.year == yearToDisplay))
             .join("circle")
-            .sort((a, b) => b.total_deaths - a.total_deaths)
             .attr('class', 'country')
             .attr('id', d => d.code)
             .attr('opacity', 0.7)
