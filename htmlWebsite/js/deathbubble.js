@@ -91,7 +91,7 @@ function BubbleChart(data, {
         // decrease opacity of all other circles with 1s transition
         transitionOpacity(d3.selectAll("circle").filter(function (d) {
             return d.data !== i.data;
-        }), 0.5, 500);
+        }), 0.3, 500);
 
         // hide all other text with 1s transition
         transitionOpacity(d3.selectAll(".bubble-text").filter(function (d) {
@@ -136,7 +136,7 @@ function BubbleChart(data, {
             .join("tspan")
             .attr("x", 0)
             .attr("y", (d, i, D) => `${i - D.length / 2 + 0.85}em`)
-            .attr("fill-opacity", (d, i, D) => i === D.length - 1 ? 0.7 : null)
+            .attr("fill-opacity", (d, i, D) => i === D.length - 1 ? 0.9 : null)
             .text(d => {
                 // increase font size for top 10 diseases
                 if (top10Diseases.includes(d)) {
@@ -155,17 +155,20 @@ function BubbleChart(data, {
     .attr("id", "tooltip")
     .attr("transform", `translate(${width/2 - margin/2}, ${height - margin + 10})`)
 
-    tooltip.append("rect")
+    const rect = tooltip.append("rect")
     .attr("width", 300)
-    .attr("height", 75)
-    .attr("fill", "white")
+    .attr("height", 70)
     .attr("stroke", "black")
     .attr("stroke-width", 1)
+    .attr("opacity", 0.4)
+    .attr("rx", 10)
+    .attr("ry", 10);
+
+    
 
 
     // dispatch event definition
-    dispatch.on("showTooltip", function (d) {
-        console.log('d', d);
+    dispatch.on("showTooltip", function (d, i) {
 
         d3.select("#tooltipRect")
         .remove();
@@ -177,9 +180,11 @@ function BubbleChart(data, {
         tooltipRect.append("text")
         .attr("x", 150)
         .attr("y", 25)
-        .attr("fill", "black")
         .attr("font-size", 15)
         .text(d.name);
+
+        // change bg color of tooltip rectange based on the color of the circle
+        rect.attr("fill", color(G[i.data]));
 
         // add commas to the value
         const value = d.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -187,7 +192,6 @@ function BubbleChart(data, {
         tooltipRect.append("text")
         .attr("x", 150)
         .attr("y", 50)
-        .attr("fill", "black")
         .attr("font-size", 15)
         .attr('opacity', 0.7)
         .text(value);
@@ -257,7 +261,7 @@ getData().then((data) => {
         totalData: expandedDiseaseData
     });
 
-    document.getElementById('chart').appendChild(chart);
+    document.getElementById('db_chart').appendChild(chart);
 })
 
 function transitionOpacity(selection, opacity, duration) {
