@@ -30,19 +30,22 @@ function StackedAreaChart(data, {
     const Y = d3.map(data, y);
     const Z = d3.map(data, z);
 
+    const yearGroup = d3.group(data, d => d.year, d => d.age);
+
     // Compute default x- and z-domains, and unique the z-domain.
     if (xDomain === undefined) xDomain = d3.extent(X);
     if (zDomain === undefined) zDomain = Z;
+
     zDomain = new d3.InternSet(zDomain);
-
     // Omit any data not present in the z-domain.
-    const I = d3.range(X.length).filter(i => zDomain.has(Z[i]));
 
+    const I = d3.range(X.length).filter(i => zDomain.has(Z[i]));
     // Compute a nested array of series where each series is [[y1, y2], [y1, y2],
     // [y1, y2], …] representing the y-extent of each stacked rect. In addition,
     // each tuple has an i (index) property so that we can refer back to the
     // original data point (data[i]). This code assumes that there is only one
     // data point for a given unique x- and z-value.
+
     const series = d3.stack()
         .keys(zDomain)
         .value(([x, I], z) => Y[I.get(z)])
@@ -50,8 +53,6 @@ function StackedAreaChart(data, {
         .offset(offset)
         (d3.rollup(I, ([i]) => i, i => X[i], i => Z[i]))
         .map(s => s.map(d => Object.assign(d, {i: d.data[1].get(s.key)})));
-
-    console.log(data);
 
     // Compute the default y-domain. Note: diverging stacks can be negative.
     if (yDomain === undefined) yDomain = d3.extent(series.flat(2));
@@ -75,10 +76,7 @@ function StackedAreaChart(data, {
         .attr("viewBox", [0, 0, width, height])
         .attr("style", "max-width: 100%; height: auto; height: intrinsic;")
         .style("-webkit-tap-highlight-color", "transparent")
-        .style("overflow", "visible")
-        .on("pointerenter pointermove", pointermoved)
-        .on("pointerleave", pointerleft)
-        .on("touchstart", event => event.preventDefault());
+        .style("overflow", "visible");
 
     svg.append("g")
         .attr("transform", `translate(${marginLeft},0)`)
@@ -109,7 +107,10 @@ function StackedAreaChart(data, {
         })
         .on('mouseout', function (event, d) {
             d3.select(this).attr('opacity', 0.8);
-        });
+        })
+        .on("pointerenter pointermove", pointermoved)
+        .on("pointerleave", pointerleft)
+        .on("touchstart", event => event.preventDefault());
 
     paths.append("title")
         .text(([{i}]) => 'age range: ' + Z[i]);
@@ -142,47 +143,54 @@ function StackedAreaChart(data, {
         .text(d => d + ' years')
         .attr("fill", (d,  i) => color(d));
 
-    const title = (i) => {
-        return `age range: ${Z[i]}\n` +
-            `DALY: ${Y[i]}\n` +
-            `year: ${X[i]}`;
-    }
-
     // Tooltip
     const tooltip = svg.append("g")
         .style("pointer-events", "none");
 
-    function pointermoved(event) {
-        const i = d3.bisectCenter(X, xScale.invert(d3.pointer(event)[0]));
-        tooltip.style("display", null);
-        tooltip.attr("transform", `translate(${xScale(X[i])},${d3.pointer(event)[1]})`);
+    const tooltipLine = svg.append('g')
+        .attr('class', 'tooltip-line');
 
-        const path = tooltip.selectAll("path")
-            .data([,])
-            .join("path")
-            .attr("fill", "white")
-            .attr("stroke", "black");
+    function pointermoved(event) {
+        let i = Math.round(xScale.invert(d3.pointer(event)[0]));
+        if (i < 1990) i = 1990;
+        if (i > 2019) i = 2019;
+
+
+        tooltip.style("display", null);
+        tooltip.attr("transform", `translate(${d3.pointer(event)[0]},${d3.pointer(event)[1]})`);
+
+        tooltip.selectAll("text").remove();
 
         const text = tooltip.selectAll("text")
-            .data([,])
+            .data(ageRanges)
             .join("text")
-            .call(text => text
-                .selectAll("tspan")
-                .data(`${title(i)}`.split(/\n/))
-                .join("tspan")
-                .attr("x", 0)
-                .attr("y", (_, i) => `${i * 1.1}em`)
-                .attr("font-weight", (_, i) => i ? null : "bold")
-                .text(d => d));
+            .attr("dy", "0.35em")
+            .attr("x", 10)
+            .attr("y", (d, i) => (i + 1) * 20)
+            .text((d) => {
+                return `${d} years: ${yearGroup.get(i).get(d)[0].deaths}`;
+            });
 
-        const {x, y, width: w, height: h} = text.node().getBBox();
-        text.attr("transform", `translate(${-w / 2},${15 - y})`);
-        path.attr("d", `M${-w / 2 - 10},5H-5l5,-5l5,5H${w / 2 + 10}v${h + 20}h-${w + 20}z`);
-        svg.property("value", O[i]).dispatch("input", {bubbles: true});
+        tooltip.append("text")
+            .attr("dy", "0.35em")
+            .attr("x", 10)
+            .attr("y", 0)
+            .text('year: ' + i + ' (DALYs)');
+
+        tooltipLine.selectAll('line').remove();
+        tooltipLine.append('line')
+            .attr('x1', xScale(i))
+            .attr('x2', xScale(i))
+            .attr('y1', 0)
+            .attr('y2', height - marginBottom)
+            .attr('stroke', 'black')
+            .attr('stroke-width', 1)
+            .attr('stroke-dasharray', 5);
     }
 
     function pointerleft() {
-        tooltip.style("display", "none");
+        tooltip.selectAll("text").remove();
+        tooltipLine.selectAll('line').remove();
         svg.node().value = null;
         svg.dispatch("input", {bubbles: true});
     }
