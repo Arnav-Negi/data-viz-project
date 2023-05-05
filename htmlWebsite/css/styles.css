@@ -1,10 +1,19 @@
+
+.row.header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    background-color: #dce8f6ea;
+}
+
 .row.graph1 {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     padding-top: 20px;
     padding-bottom: 20px;
-    background-color: #f1f1f120;
 }
 
 .row.graph2 {
@@ -13,19 +22,60 @@
     justify-content: center;
     padding-top: 20px;
     padding-bottom: 20px;
-    background-color: rgb(242, 251, 254)
+    padding-left: 20px;
+    background-color: #dce8f6ea;
+}
+
+.row.graph3 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
 }
 
 nav {
-    background-color: #f1f1f120;
+    background-color: #003f88;
+    color: white;
 }
 
-h1 {
+.nav-link {
+    color: white;
+}
+
+.nav-link:hover {
+    color:rgb(128, 183, 231);
+}
+
+h3.display-6 {
+    font-size: 1.75rem;
+}
+
+h1.display-4 {
     transition: all 0.5s ease;
 }
 
-h1:hover {
-    color:aliceblue;
+h1.display-4:hover {
+    color: #003f88;
     transform: scale(1.05);
-    text-shadow: 0px 0px 16px rgba(255, 255, 255, 0.5);
+    text-shadow: 0px 0px 16px rgba(0, 0, 0, 0.5);
+}
+
+.make-me-sticky {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    padding: 20px 10px;
+}
+
+.card {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #003f88;
+    transition: all 0.5s ease;
+}
+
+.card:hover {
+    box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.5);
 }
