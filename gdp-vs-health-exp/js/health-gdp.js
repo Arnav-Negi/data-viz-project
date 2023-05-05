@@ -12,13 +12,16 @@ getData().then((data) => {
         d.year = +d.year;
         d.gdp = +d.gdp;
         d.exp = +d.exp;
-        d.total_deaths = +d.total_deaths;
+        d.death_rate = +d.death_rate;
     });
 
     continents = ["Africa", "Asia", "Europe", "North America", "Oceania", "South America"];
 
     // remove data for "world"
     data = data.filter(d => d.country != "World");
+
+    // remove data where death rate is 0
+    data = data.filter(d => d.death_rate > 0);
 
     // get countries starting with r
     console.log(data.filter(d => d.country.startsWith("R")));
@@ -72,12 +75,12 @@ getData().then((data) => {
 
     console.log("colorContinents:", colorContinents);
 
-    death_extent = d3.extent(data.filter(d => d.year == yearToDisplay), d => d.total_deaths)
+    death_extent = d3.extent(data.filter(d => d.year == yearToDisplay), d => d.death_rate)
     console.log("death_extent:", death_extent);
 
     size = d3.scaleSqrt()
         .domain(death_extent)
-        .range([3, 25]);
+        .range([1, 10]);
 
     // append to dom
     const yearScrubber = document.getElementById('scrubber');
@@ -100,8 +103,8 @@ getData().then((data) => {
             .nice();
 
         size = d3.scaleSqrt()
-            .domain(d3.extent(data.filter(d => d.year == yearToDisplay), d => d.total_deaths))
-            .range([2, 25]);
+            .domain(d3.extent(data.filter(d => d.year == yearToDisplay), d => d.death_rate))
+            .range([1, 10]);
 
     });
 
@@ -179,7 +182,7 @@ getData().then((data) => {
             .attr('opacity', 0.7)
             .attr("cx", d => x(d.gdp))
             .attr("cy", d => y(d.exp))
-            .attr("r", d => size(d.total_deaths))
+            .attr("r", d => size(d.death_rate))
             .attr("fill", d => colorContinents[d.continent])
             .attr("stroke", d => d3.color(colorContinents[d.continent]).darker())
 
@@ -191,29 +194,29 @@ getData().then((data) => {
                     return d.year == yearToDisplay
                 }
                 ), d => d.code)
-                .sort((a, b) => b.total_deaths - a.total_deaths)
+                .sort((a, b) => b.death_rate - a.death_rate)
                 .transition()
                 .duration(1000)
                 .attr('id', d => d.code)
                 .attr("cx", d => x(d.gdp))
                 .attr("cy", d => y(d.exp))
-                .attr("r", d => size(d.total_deaths))
+                .attr("r", d => size(d.death_rate))
                 .attr("fill", d => colorContinents[d.continent])
                 .attr("stroke", d => d3.color(colorContinents[d.continent]).darker())
         });
 
         country_click = false
-
+        country_clicked_code = ''
         countries
             .on('mouseover', function () {
-                if(country_click){
+                if (country_click) {
                     return;
                 }
 
                 d3.select(this).attr('stroke', '#333')
                 d3.select(this).attr('opacity', 1)
                 // get country data
-                const d = data.filter(d => d.code == this.id)[0];
+                const d = data.filter(d => d.year == yearToDisplay).filter(d => d.code == this.id)[0];
 
                 // add data to tooltip
                 two_lines = false
@@ -281,14 +284,14 @@ getData().then((data) => {
                     .attr('y', 140)
                     .attr('font-size', '14px')
                     .attr('font-weight', 'bold')
-                    .text("Total deaths:");
+                    .text("Death Rate:");
 
                 tooltip.append('text')
                     .attr('class', 'country-data')
                     .attr('x', 10)
                     .attr('y', 155)
                     .attr('font-size', '14px')
-                    .text(`${d.total_deaths}`);
+                    .text(`${d.death_rate}`);
 
                 tooltip.append('text')
                     .attr('class', 'country-data')
@@ -346,6 +349,7 @@ getData().then((data) => {
                 // if already clicked, reset
                 if (country_click) {
                     country_click = false
+                    country_clicked_code = ''
                     d3.select(this).attr('stroke', d => d3.color(colorContinents[d.continent]).darker())
                     countries.transition().duration(500).attr('opacity', 0.7)
 
@@ -355,6 +359,7 @@ getData().then((data) => {
                 }
 
                 country_click = true
+                country_clicked_code = this.id
                 d3.select(this).attr('stroke', '#333')
 
                 // set opacity of all other countries to 0.1
@@ -362,7 +367,106 @@ getData().then((data) => {
                 d3.select(this).transition().duration(500).attr('opacity', 1)
 
 
-                const d = data.filter(d => d.code == this.id)[0];
+                // get country data
+                const d = data.filter(d => d.year == yearToDisplay).filter(d => d.code == this.id)[0];
+                console.log(d)
+                // add data to tooltip
+                two_lines = false
+                tooltip.append('text')
+                    .attr('class', 'country-name')
+                    .attr('x', 10)
+                    .attr('y', 20)
+                    .attr('font-size', '18px')
+                    .attr('font-weight', 'bold')
+                    .text(() => {
+                        // if too long, shorten
+                        if (d.country.length > 15) {
+                            two_lines = true
+                            return d.country.substring(0, 14) + '-';
+                        }
+
+                        return d.country;
+                    });
+
+                if (two_lines) {
+                    tooltip.append('text')
+                        .attr('class', 'country-name')
+                        .attr('x', 10)
+                        .attr('y', 35)
+                        .attr('font-size', '18px')
+                        .attr('font-weight', 'bold')
+                        .text(d.country.substring(14));
+                }
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 60)
+                    .attr('font-size', '14px')
+                    .attr('font-weight', 'bold')
+                    .text("GDP per capita:");
+
+                // get data to two decimal places
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 75)
+                    .attr('font-size', '14px')
+                    .text(`$${d.gdp.toFixed(2)}`);
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 100)
+                    .attr('font-size', '14px')
+                    .attr('font-weight', 'bold')
+                    .text("Health expenditure:");
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 115)
+                    .attr('font-size', '14px')
+                    .text(`$${d.exp.toFixed(2)}`);
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 140)
+                    .attr('font-size', '14px')
+                    .attr('font-weight', 'bold')
+                    .text("Death Rate:");
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 155)
+                    .attr('font-size', '14px')
+                    .text(`${d.death_rate}`);
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 180)
+                    .attr('font-size', '14px')
+                    .attr('font-weight', 'bold')
+                    .text("Continent:");
+
+                tooltip.append('text')
+                    .attr('class', 'country-data')
+                    .attr('x', 10)
+                    .attr('y', 195)
+                    .attr('font-size', '14px')
+                    .text(`${d.continent}`);
+            });
+
+        // on scrubber change, update tooltip if country is clicked
+        yearFilter.node().addEventListener('input', function () {
+            if (country_click) {
+                const d = data.filter(d => d.year == yearToDisplay).filter(d => d.code == country_clicked_code)[0];
+
+                // remove tooltip text
+                tooltip.selectAll('text').remove();
 
                 // add data to tooltip
                 two_lines = false
@@ -429,14 +533,14 @@ getData().then((data) => {
                     .attr('y', 140)
                     .attr('font-size', '14px')
                     .attr('font-weight', 'bold')
-                    .text("Total deaths:");
+                    .text("Death Rate:");
 
                 tooltip.append('text')
                     .attr('class', 'country-data')
                     .attr('x', 10)
                     .attr('y', 155)
                     .attr('font-size', '14px')
-                    .text(`${d.total_deaths}`);
+                    .text(`${d.death_rate}`);
 
                 tooltip.append('text')
                     .attr('class', 'country-data')
@@ -452,7 +556,8 @@ getData().then((data) => {
                     .attr('y', 195)
                     .attr('font-size', '14px')
                     .text(`${d.continent}`);
-            });
+            }
+        });
 
         // create a tooltip for countires being hovered over below the legend
         const tooltip = svg.append('g')
