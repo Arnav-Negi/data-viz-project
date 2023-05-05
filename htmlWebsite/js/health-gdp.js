@@ -22,6 +22,10 @@ getData2().then((data) => {
 
     // remove data where death rate is 0
     data = data.filter(d => d.death_rate > 0);
+    // remove data where gdp is 0
+    data = data.filter(d => d.gdp > 0);
+    // remove data where exp is 0
+    data = data.filter(d => d.exp > 0);
 
     // get countries starting with r
     console.log(data.filter(d => d.country.startsWith("R")));
@@ -174,7 +178,7 @@ getData2().then((data) => {
         });
 
         // add circles for each country
-        const countries = svg.append("g")
+        let countries = svg.append("g")
             .selectAll("circle")
             .data(data.filter(d => d.year == yearToDisplay))
             .join("circle")
@@ -204,6 +208,17 @@ getData2().then((data) => {
                 .attr("r", d => size(d.death_rate))
                 .attr("fill", d => colorContinents[d.continent])
                 .attr("stroke", d => d3.color(colorContinents[d.continent]).darker())
+
+            // if country doesn't exist in new year, remove circle with transition
+            svg.selectAll('.country')
+                .data(data.filter(d => {
+                    return d.year == yearToDisplay
+                }), d => d.code)
+                .exit()
+                .transition()
+                .duration(1000)
+                .attr('opacity', 0)
+                .remove()
         });
 
         country_click = false
@@ -465,6 +480,12 @@ getData2().then((data) => {
         yearFilter.node().addEventListener('input', function () {
             if (country_click) {
                 const d = data.filter(d => d.year == yearToDisplay).filter(d => d.code == country_clicked_code)[0];
+
+                // if country is not in data for that year, remove tooltip_gdp
+                if (d == undefined) {
+                    tooltip_gdp.selectAll('text').remove();
+                    return;
+                }
 
                 // remove tooltip_gdp text
                 tooltip_gdp.selectAll('text').remove();
