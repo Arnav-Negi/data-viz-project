@@ -1,9 +1,9 @@
-var marginStacked = { top: 0, right: 0, bottom: 0, left: 0 },
+var marginStacked = { top: 40, right: 30, bottom: 20, left: 30 },
   widthStacked = 860 - marginStacked.left - marginStacked.right + 300,
   heightstacked = 600 - marginStacked.top - marginStacked.bottom + 100;
 
 var svgStacked = d3
-  .select("#my_dataviz")
+  .select("#stack_chart")
   .append("svg")
   .attr("width", widthStacked + marginStacked.left + marginStacked.right)
   .attr("height", heightstacked + marginStacked.top + marginStacked.bottom)
@@ -16,8 +16,6 @@ var svgStacked = d3
 d3.csv(
   "https://raw.githubusercontent.com/himanibelsare/data-vis-files/main/cause_of_deaths.csv"
 ).then(function (data) {
-  // let filteredData = { "Year": 0, "Meningitis": 0, "Alzheimer": 0, "Parkinsons": 0, "Nutritional": 0, "Malaria": 0, "Drowning": 0, "Interpersonal Violence": 0, "Maternal Disorders": 0, "HIV/AIDS": 0, "Drug": 0, "Tuberculosis": 0, "Cardiovascular": 0, "Lower Respiratory": 0, "Neonatal": 0, "Alcohol": 0, "Self-harm": 0, "Nature": 0, "Diarrheal": 0, "Heat/Cold": 0, "Neoplasms": 0, "Terrorism": 0, "Diabetes": 0, "Kidney": 0, "Poisonings": 0, "Malnutrition": 0, "Road": 0, "Chronic Respiratory": 0, "Liver": 0, "Digestive": 0, "Fire": 0, "Hepatitis": 0 };
-
   const myArray = [];
   for (let year = 1990; year <= 2019; year++) {
     const filteredData = {
@@ -69,24 +67,18 @@ d3.csv(
 
     myArray.push(Object.assign({}, filteredData));
   }
-  // console.log(myArray);
   var subgroups = data.columns.slice(3);
-  // console.log(subgroups);
-  var groups = d3
-    .map(data, function (d) {
-      return d.Year;
-    })
-    .keys();
-  // console.log(groups);
-  // Add X axis
-  var x = d3.scaleBand().domain(groups).range([0, widthStacked]).padding([0.4]);
+
+var groupsStacked = [1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019];
+
+  console.log(groupsStacked);
+  var x = d3.scaleBand().domain(groupsStacked).range([0, 800]).padding([0.4]);
   var xGroup = svgStacked
     .append("g")
     .attr("transform", "translate(0," + heightstacked + ")")
     .call(d3.axisBottom(x).tickSizeOuter(0));
-  // Add Y axis
   var y = d3.scaleLinear().domain([0, 100]).range([heightstacked, 0]);
-  var yGroup = svgStacked.append("g").call(d3.axisLeft(y));
+  svgStacked.append("g").call(d3.axisLeft(y));
   var color = d3
     .scaleOrdinal()
     .domain(subgroups)
@@ -123,89 +115,15 @@ d3.csv(
       "#FF4500",
     ]);
 
-  var color2 = d3
-    .scaleOrdinal()
-    .domain(subgroups)
-    .range([
-      "#001219",
-      "#001219",
-      "#001219",
-      "#005f73",
-      "#005f73",
-      "#005f73",
-      "#0a9396",
-      "#0a9396",
-      "#0a9396",
-      "#94d2bd",
-      "#94d2bd",
-      "#94d2bd",
-      "#e9d8a6",
-      "#e9d8a6",
-      "#e9d8a6",
-      "#ee9b00",
-      "#ee9b00",
-      "#ee9b00",
-      "#ca6702",
-      "#ca6702",
-      "#ca6702",
-      "#bb3e03",
-      "#bb3e03",
-      "#bb3e03",
-      "#ae2012",
-      "#ae2012",
-      "#ae2012",
-      "#9b2226",
-      "#9b2226",
-      "#9b2226",
-    ]);
 
-  var color3 = d3
-    .scaleOrdinal()
-    .domain(subgroups)
-    .range([
-      "#FFC300",
-      "#FF5733",
-      "#C70039",
-      "#900C3F",
-      "#581845",
-      "#FF6384",
-      "#FFB6C1",
-      "#FF8C00",
-      "#FFD700",
-      "#7FFF00",
-      "#00FF00",
-      "#8d99ae",
-      "#00BFFF",
-      "#0000FF",
-      "#8A2BE2",
-      "#4B0082",
-      "#9400D3",
-      "#BEBEBE",
-      "#363636",
-      "#F0F8FF",
-      "#000000",
-      "#F08080",
-      "#00CED1",
-      "#FF69B4",
-      "#6A5ACD",
-      "#B22222",
-      "#228B22",
-      "#9932CC",
-      "#FF1493",
-      "#008080",
-    ]);
-
-  // console.log(myArray)
-  // dataNormalized = []
   myArray.forEach(function (d) {
     tot = 0;
     for (i in subgroups) {
-      // console.log(subgroups[i], d[subgroups[i]]);
-      name = subgroups[i];
+      let name = subgroups[i];
       tot += +d[name];
     }
     for (i in subgroups) {
-      name = subgroups[i];
+      let name = subgroups[i];
       d[name] = (d[name] / tot) * 100;
     }
   });
@@ -215,7 +133,6 @@ d3.csv(
     myCountries.add(item.Country);
   });
   var countries = Array.from(myCountries);
-  // console.log(countries);
 
   var stackedData = d3.stack().keys(subgroups)(myArray);
 
@@ -226,18 +143,16 @@ d3.csv(
     .enter()
     .append("g")
     .attr("fill", function (d) {
-      // console.log(d.key);
       return color(d.key);
     })
     .selectAll("rect")
-    .data(function (d) {
-      // console.log(d);
+    .data(function (d, i) {
       return d;
     })
     .enter()
     .append("rect")
     .attr("x", function (d) {
-      // console.log(d.data.Year);
+        console.log(d.data.Year);
       return x(d.data.Year);
     })
     .attr("y", function (d) {
@@ -249,31 +164,31 @@ d3.csv(
     .attr("width", x.bandwidth())
     .on("mouseover", function (d, i) {
       d3.select(this).attr("stroke", "black").attr("stroke-width", "2px");
-      // console.log(d, i);
-      // console.log(d[1] - d[0]);
-      let difference = d[1] - d[0];
-      // console.log(typeof (d.data));
+      let difference = i[1] - i[0];
+      console.log(difference);
       let key = "";
-      for (const k in d.data) {
-        if (Math.abs(d.data[k] - difference) < Math.pow(10, -5)) {
+      for (const k in i.data) {
+        if (Math.abs(i.data[k] - difference) < Math.pow(10, -5)) {
           key = k;
         }
       }
-      // console.log(key);
-      let tooltipContent =
-        "Disease: " +
-        key +
-        "<br>" +
-        "Number %: " +
-        d.data[key] +
-        "<br>" +
-        "Year: " +
-        d.data.Year;
+        console.log(key);
+        console.log(i.data[key]);
+        console.log(i.data.Year);
+        let tooltipContent1 =
+          "Disease: " +
+          key +
+          "<br>" +
+          "Number %: " +
+          d.data[key] +
+          "<br>" +
+          "Year: " +
+          d.data.Year;
 
-      tippy(this, {
-        content: tooltipContent,
-        allowHTML: true,
-      });
+        tippy(this, {
+          content: tooltipContent1,
+          allowHTML: true,
+        });
     })
     .on("mouseout", function (d, i) {
       d3.select(this).attr("stroke", "none");
@@ -302,20 +217,20 @@ d3.csv(
 
     var myNewData = new Set();
     data.forEach((item) => {
-      // console.log(item.Year);
+      console.log(item.Year);
       if (item.Year === newYear.toString()) myNewData.add(item);
     });
     var newData = Array.from(myNewData);
-    console.log(newData);
+    // console.log(newData);
     newData.forEach(function (d) {
       tot = 0;
       for (i in subgroups) {
         // console.log(subgroups[i], d[subgroups[i]]);
-        name = subgroups[i];
+        let name = subgroups[i];
         tot += +d[name];
       }
       for (i in subgroups) {
-        name = subgroups[i];
+        let name = subgroups[i];
         d[name] = (d[name] / tot) * 100;
       }
     });
@@ -363,7 +278,7 @@ d3.csv(
         // console.log(key);
 
         console.log(countries[i]);
-        let tooltipContent =
+        let tooltipContent1 =
           "Country: " +
           countries[i] +
           "<br>" +
@@ -377,7 +292,7 @@ d3.csv(
           d.data.Year;
 
         tippy(this, {
-          content: tooltipContent,
+          content: tooltipContent1,
           allowHTML: true,
         });
       })
