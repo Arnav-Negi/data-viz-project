@@ -35,6 +35,16 @@
     padding-left: 20px;
 }
 
+.row.agegraph {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+    background-color: #dce8f6ea;
+}
+
 nav {
     background-color: #003f88;
     color: white;
