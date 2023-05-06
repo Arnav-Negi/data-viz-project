@@ -156,32 +156,28 @@ function IndexChart(data, {
     return Object.assign(svg.node(), {scales: {color}, update});
 }
 
-const countries = ['India', 'United States', 'United Kingdom', 'Japan', 'United Arab Emirates', 'Canada', 'Germany',
+const countriesSelected = ['India', 'United States', 'United Kingdom', 'Japan', 'United Arab Emirates', 'Canada', 'Germany',
 'South Korea', 'Russia', 'Australia', 'Israel']
-const dataArray = []
+const dataContainer = []
 
 const cause = 'self_harm'
 const file = 'https://raw.githubusercontent.com/Arnav-Negi/data-viz-project/main/data/disease-burden-from-injuries.csv'
 
 function build() {
-    document.getElementById('chart').append(IndexChart(dataArray, {
+    document.getElementById('suicide_chart').innerHTML = '';
+    document.getElementById('suicide_chart').append(IndexChart(dataContainer, {
         x: (d) => d.year,
         y: (d) => d.deaths,
         z: (d) => d.country,
         xType: d3.scaleLinear,
         xFormat: d3.format("d"),
         yLabel: 'Suicides (log scale)',
-        zDomain: countries,
+        zDomain: countriesSelected
     }));
 }
 
 d3.csv(file, (d) => {
-    console.log({
-        country: d.Country,
-        year: +d.Year,
-        deaths: +d[cause]
-    })
-    dataArray.push({
+    dataContainer.push({
         country: d.Country,
         year: +d.Year,
         deaths: +d[cause]

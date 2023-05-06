@@ -203,9 +203,9 @@ const dataArray = []
 const countries = new Set();
 
 function build(country) {
-    const chart = document.getElementById('chart');
+    const chart = document.getElementById('age_chart');
     chart.innerHTML = '';
-    chart.append(StackedAreaChart(dataArray.filter((d) => d.country === country), {
+    chart.appendChild(StackedAreaChart(dataArray.filter((d) => d.country === country), {
         x: (d) => d.year,
         y: (d) => d.deaths,
         z: (d) => d.age,
