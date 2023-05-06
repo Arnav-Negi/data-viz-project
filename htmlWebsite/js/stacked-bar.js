@@ -1,0 +1,388 @@
+var marginStacked = { top: 0, right: 0, bottom: 0, left: 0 },
+  widthStacked = 860 - marginStacked.left - marginStacked.right + 300,
+  heightstacked = 600 - marginStacked.top - marginStacked.bottom + 100;
+
+var svgStacked = d3
+  .select("#my_dataviz")
+  .append("svg")
+  .attr("width", widthStacked + marginStacked.left + marginStacked.right)
+  .attr("height", heightstacked + marginStacked.top + marginStacked.bottom)
+  .append("g")
+  .attr(
+    "transform",
+    "translate(" + marginStacked.left + "," + marginStacked.top + ")"
+  );
+
+d3.csv(
+  "https://raw.githubusercontent.com/himanibelsare/data-vis-files/main/cause_of_deaths.csv"
+).then(function (data) {
+  // let filteredData = { "Year": 0, "Meningitis": 0, "Alzheimer": 0, "Parkinsons": 0, "Nutritional": 0, "Malaria": 0, "Drowning": 0, "Interpersonal Violence": 0, "Maternal Disorders": 0, "HIV/AIDS": 0, "Drug": 0, "Tuberculosis": 0, "Cardiovascular": 0, "Lower Respiratory": 0, "Neonatal": 0, "Alcohol": 0, "Self-harm": 0, "Nature": 0, "Diarrheal": 0, "Heat/Cold": 0, "Neoplasms": 0, "Terrorism": 0, "Diabetes": 0, "Kidney": 0, "Poisonings": 0, "Malnutrition": 0, "Road": 0, "Chronic Respiratory": 0, "Liver": 0, "Digestive": 0, "Fire": 0, "Hepatitis": 0 };
+
+  const myArray = [];
+  for (let year = 1990; year <= 2019; year++) {
+    const filteredData = {
+      Year: year,
+      Meningitis: 0,
+      Alzheimer: 0,
+      Parkinsons: 0,
+      Nutritional: 0,
+      Malaria: 0,
+      Drowning: 0,
+      "Interpersonal Violence": 0,
+      "Maternal Disorders": 0,
+      "HIV/AIDS": 0,
+      Drug: 0,
+      Tuberculosis: 0,
+      Cardiovascular: 0,
+      "Lower Respiratory": 0,
+      Neonatal: 0,
+      Alcohol: 0,
+      "Self-harm": 0,
+      Nature: 0,
+      Diarrheal: 0,
+      "Heat/Cold": 0,
+      Neoplasms: 0,
+      Terrorism: 0,
+      Diabetes: 0,
+      Kidney: 0,
+      Poisonings: 0,
+      Malnutrition: 0,
+      Road: 0,
+      "Chronic Respiratory": 0,
+      Liver: 0,
+      Digestive: 0,
+      Fire: 0,
+      Hepatitis: 0,
+    };
+
+    data.forEach((current) => {
+      if (current.Year === year.toString()) {
+        for (const [key, value] of Object.entries(current)) {
+          if (key !== "Country" && key !== "Code" && key !== "Year") {
+            if (filteredData.hasOwnProperty(key)) {
+              filteredData[key] += parseInt(value);
+            }
+          }
+        }
+      }
+    });
+
+    myArray.push(Object.assign({}, filteredData));
+  }
+  // console.log(myArray);
+  var subgroups = data.columns.slice(3);
+  // console.log(subgroups);
+  var groups = d3
+    .map(data, function (d) {
+      return d.Year;
+    })
+    .keys();
+  // console.log(groups);
+  // Add X axis
+  var x = d3.scaleBand().domain(groups).range([0, widthStacked]).padding([0.4]);
+  var xGroup = svgStacked
+    .append("g")
+    .attr("transform", "translate(0," + heightstacked + ")")
+    .call(d3.axisBottom(x).tickSizeOuter(0));
+  // Add Y axis
+  var y = d3.scaleLinear().domain([0, 100]).range([heightstacked, 0]);
+  var yGroup = svgStacked.append("g").call(d3.axisLeft(y));
+  var color = d3
+    .scaleOrdinal()
+    .domain(subgroups)
+    .range([
+      "#FFB6C1",
+      "#FF69B4",
+      "#FFC0CB",
+      "#F08080",
+      "#CD5C5C",
+      "#FFA07A",
+      "#FF8C00",
+      "#FFD700",
+      "#FFFF00",
+      "#ADFF2F",
+      "#00FF7F",
+      "#00ffff",
+      "#40E0D0",
+      "#00BFFF",
+      "#1E90FF",
+      "#4169E1",
+      "#6A5ACD",
+      "#9932CC",
+      "#FF1493",
+      "#DC143C",
+      "#A52A2A",
+      "#556B2F",
+      "#008080",
+      "#228B22",
+      "#2F4F4F",
+      "#808080",
+      "#D3D3D3",
+      "#F5DEB3",
+      "#000000",
+      "#FF4500",
+    ]);
+
+  var color2 = d3
+    .scaleOrdinal()
+    .domain(subgroups)
+    .range([
+      "#001219",
+      "#001219",
+      "#001219",
+      "#005f73",
+      "#005f73",
+      "#005f73",
+      "#0a9396",
+      "#0a9396",
+      "#0a9396",
+      "#94d2bd",
+      "#94d2bd",
+      "#94d2bd",
+      "#e9d8a6",
+      "#e9d8a6",
+      "#e9d8a6",
+      "#ee9b00",
+      "#ee9b00",
+      "#ee9b00",
+      "#ca6702",
+      "#ca6702",
+      "#ca6702",
+      "#bb3e03",
+      "#bb3e03",
+      "#bb3e03",
+      "#ae2012",
+      "#ae2012",
+      "#ae2012",
+      "#9b2226",
+      "#9b2226",
+      "#9b2226",
+    ]);
+
+  var color3 = d3
+    .scaleOrdinal()
+    .domain(subgroups)
+    .range([
+      "#FFC300",
+      "#FF5733",
+      "#C70039",
+      "#900C3F",
+      "#581845",
+      "#FF6384",
+      "#FFB6C1",
+      "#FF8C00",
+      "#FFD700",
+      "#7FFF00",
+      "#00FF00",
+      "#8d99ae",
+      "#00BFFF",
+      "#0000FF",
+      "#8A2BE2",
+      "#4B0082",
+      "#9400D3",
+      "#BEBEBE",
+      "#363636",
+      "#F0F8FF",
+      "#000000",
+      "#F08080",
+      "#00CED1",
+      "#FF69B4",
+      "#6A5ACD",
+      "#B22222",
+      "#228B22",
+      "#9932CC",
+      "#FF1493",
+      "#008080",
+    ]);
+
+  // console.log(myArray)
+  // dataNormalized = []
+  myArray.forEach(function (d) {
+    tot = 0;
+    for (i in subgroups) {
+      // console.log(subgroups[i], d[subgroups[i]]);
+      name = subgroups[i];
+      tot += +d[name];
+    }
+    for (i in subgroups) {
+      name = subgroups[i];
+      d[name] = (d[name] / tot) * 100;
+    }
+  });
+
+  const myCountries = new Set();
+  data.forEach((item) => {
+    myCountries.add(item.Country);
+  });
+  var countries = Array.from(myCountries);
+  // console.log(countries);
+
+  var stackedData = d3.stack().keys(subgroups)(myArray);
+
+  svgStacked
+    .append("g")
+    .selectAll("g")
+    .data(stackedData)
+    .enter()
+    .append("g")
+    .attr("fill", function (d) {
+      // console.log(d.key);
+      return color(d.key);
+    })
+    .selectAll("rect")
+    .data(function (d) {
+      // console.log(d);
+      return d;
+    })
+    .enter()
+    .append("rect")
+    .attr("x", function (d) {
+      // console.log(d.data.Year);
+      return x(d.data.Year);
+    })
+    .attr("y", function (d) {
+      return y(d[1]);
+    })
+    .attr("height", function (d) {
+      return y(d[0]) - y(d[1]);
+    })
+    .attr("width", x.bandwidth())
+    .on("mouseover", function (d, i) {
+      d3.select(this).attr("stroke", "black").attr("stroke-width", "2px");
+      // console.log(d, i);
+      // console.log(d[1] - d[0]);
+      let difference = d[1] - d[0];
+      // console.log(typeof (d.data));
+      let key = "";
+      for (const k in d.data) {
+        if (Math.abs(d.data[k] - difference) < Math.pow(10, -5)) {
+          key = k;
+        }
+      }
+      // console.log(key);
+      let tooltipContent =
+        "Disease: " +
+        key +
+        "<br>" +
+        "Number %: " +
+        d.data[key] +
+        "<br>" +
+        "Year: " +
+        d.data.Year;
+
+      tippy(this, {
+        content: tooltipContent,
+        allowHTML: true,
+      });
+    })
+    .on("mouseout", function (d, i) {
+      d3.select(this).attr("stroke", "none");
+    });
+
+  svgStacked.selectAll("rect").on("click", function (d) {
+    // groups = countries
+    // sub groups = diseases (same)
+    const newYear = d.data.Year;
+    // console.log(newYear);
+    svgStacked.selectAll("rect").remove();
+    xGroup.remove();
+
+    var x = d3
+      .scaleBand()
+      .domain(countries)
+      .range([0, widthStacked])
+      .padding([0.35]);
+
+    svgStacked
+      .append("g")
+      .attr("transform", "translate(0," + heightstacked + ")")
+      .call(d3.axisBottom(x).tickSizeOuter(0))
+      .selectAll("text")
+      .remove();
+
+    var myNewData = new Set();
+    data.forEach((item) => {
+      // console.log(item.Year);
+      if (item.Year === newYear.toString()) myNewData.add(item);
+    });
+    var newData = Array.from(myNewData);
+    console.log(newData);
+    newData.forEach(function (d) {
+      tot = 0;
+      for (i in subgroups) {
+        // console.log(subgroups[i], d[subgroups[i]]);
+        name = subgroups[i];
+        tot += +d[name];
+      }
+      for (i in subgroups) {
+        name = subgroups[i];
+        d[name] = (d[name] / tot) * 100;
+      }
+    });
+
+    var stackedData = d3.stack().keys(subgroups)(newData);
+
+    svgStacked
+      .append("g")
+      .selectAll("g")
+      .data(stackedData)
+      .enter()
+      .append("g")
+      .attr("fill", function (d) {
+        return color(d.key);
+      })
+      .selectAll("rect")
+      .data(function (d) {
+        return d;
+      })
+      .enter()
+      .append("rect")
+      .attr("x", function (d) {
+        // console.log(d.data.Country);
+        return x(d.data.Country);
+      })
+      .attr("y", function (d) {
+        return y(d[1]);
+      })
+      .attr("height", function (d) {
+        return y(d[0]) - y(d[1]);
+      })
+      .attr("width", x.bandwidth())
+      .on("mouseover", function (d, i) {
+        d3.select(this).attr("stroke", "black").attr("stroke-width", "2px");
+        // console.log(d, i);
+        // console.log(d[1] - d[0]);
+        let difference = d[1] - d[0];
+        // console.log(typeof (d.data));
+        let key = "";
+        for (const k in d.data) {
+          if (Math.abs(d.data[k] - difference) < Math.pow(10, -5)) {
+            key = k;
+          }
+        }
+        // console.log(key);
+
+        console.log(countries[i]);
+        let tooltipContent =
+          "Country: " +
+          countries[i] +
+          "<br>" +
+          "Disease: " +
+          key +
+          "<br>" +
+          "Number %: " +
+          d.data[key] +
+          "<br>" +
+          "Year: " +
+          d.data.Year;
+
+        tippy(this, {
+          content: tooltipContent,
+          allowHTML: true,
+        });
+      })
+      .on("mouseout", function (d, i) {
+        d3.select(this).attr("stroke", "none");
+      });
+  });
+});
