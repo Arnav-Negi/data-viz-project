@@ -128,6 +128,63 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Stacked Bar Chart -->
+                    <div class="row stacked bar text-center agegraph justify-content-center" id="stack-bar"
+                        style="display: flex;justify-content: center">
+                        <h1 class="display-6">Deaths over the years</h1>
+                        <h2 class="small">Stacked bar chart representing the percentage of deaths attributed to
+                            a particular
+                            disease in the world per year</h2>
+                        <div id="stack_chart" class="m-5 text-center">
+                        </div>
+                        <div class="col-11 desc m-5">
+                            <div class="card">
+                                <p>
+                                    <b>Why this visualization?</b>
+                                    <br>
+                                    This is a nested stacked bar chart where each bar represents the percentage of
+                                    deaths attributed to diseases per year. Each bar, once clicked, expands and shows
+                                    another stacked bar chart for that particular year. Here, each bar represents a
+                                    country and the different stacks represent the number of deaths attributed to a
+                                    particular disease.
+                                    This visualization is useful for understanding the distribution of deaths due to
+                                    different diseases across various countries and over time. It provides a clear and
+                                    comprehensive overview of the mortality rates caused by different diseases.
+
+                                    A stacked bar chart is an ideal choice for this visualization as it allows us to
+                                    represent multiple categories of data in a single bar. In this case, we are
+                                    comparing the percentage of deaths due to various diseases across different
+                                    countries and over time. Using a stacked bar chart also allows us to compare the
+                                    contribution of each disease to the overall death count.
+                                </p>
+                                <p>
+                                    <b>What is it visualizing?</b>
+                                    <br>
+                                    It is visualizing the percentage of deaths attributed to different diseases across
+                                    multiple countries and over time. By using a stacked bar chart, we can easily
+                                    **compare** the contribution of each disease to the overall death count within a
+                                    given year, and also observe how this contribution **changes** over time. Upon
+                                    clicking on a bar, we can also visualise the number of deaths per disease across
+                                    several countries and how this count changes.
+                                </p>
+                                <p>
+                                    <b>How is it visualizing?</b>
+                                    <br>
+                                    The visualization presents a **nested stacked bar chart** where each bar represents
+                                    a particular year and the different stacks represent the percentage of deaths
+                                    attributed to different diseases. Upon clicking on a particular bar, the chart
+                                    expands to show another stacked bar chart representing the percentage of deaths per
+                                    disease across several countries. This **interactive** **feature** enables users to
+                                    explore the data in more detail and gain insights into how the disease burden varies
+                                    across different **countries** and over **time**.
+
+                                    On hover, that particular bar gets **highlighted** and a **tooltip** pops up. The
+                                    tooltip provides relevant information such as disease name, % of deaths due to that
+                                    disease.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                     <!-- HEALTH VS GDP TIMELINE -->
                     <div id="gdp_div" class="row graph3">
                         <div class="col-4 desc">
@@ -427,63 +484,6 @@
                                     be
                                     shown together
                                     on the same chart, making it easier to compare.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Stacked Bar Chart -->
-                    <div class="row stacked bar text-center agegraph" id="stack-bar"
-                        style="display: flex;justify-content: center">
-                        <h1 class="display-6">Deaths over the years</h1>
-                        <h2 class="small">Stacked bar chart representing the percentage of deaths attributed to
-                            a particular
-                            disease in the world per year</h2>
-                        <div id="stack_chart" class="m-5">
-                        </div>
-                        <div class="col-11 desc m-5">
-                            <div class="card">
-                                <p>
-                                    <b>Why this visualization?</b>
-                                    <br>
-                                    This is a nested stacked bar chart where each bar represents the percentage of
-                                    deaths attributed to diseases per year. Each bar, once clicked, expands and shows
-                                    another stacked bar chart for that particular year. Here, each bar represents a
-                                    country and the different stacks represent the number of deaths attributed to a
-                                    particular disease.
-                                    This visualization is useful for understanding the distribution of deaths due to
-                                    different diseases across various countries and over time. It provides a clear and
-                                    comprehensive overview of the mortality rates caused by different diseases.
-
-                                    A stacked bar chart is an ideal choice for this visualization as it allows us to
-                                    represent multiple categories of data in a single bar. In this case, we are
-                                    comparing the percentage of deaths due to various diseases across different
-                                    countries and over time. Using a stacked bar chart also allows us to compare the
-                                    contribution of each disease to the overall death count.
-                                </p>
-                                <p>
-                                    <b>What is it visualizing?</b>
-                                    <br>
-                                    It is visualizing the percentage of deaths attributed to different diseases across
-                                    multiple countries and over time. By using a stacked bar chart, we can easily
-                                    **compare** the contribution of each disease to the overall death count within a
-                                    given year, and also observe how this contribution **changes** over time. Upon
-                                    clicking on a bar, we can also visualise the number of deaths per disease across
-                                    several countries and how this count changes.
-                                </p>
-                                <p>
-                                    <b>How is it visualizing?</b>
-                                    <br>
-                                    The visualization presents a **nested stacked bar chart** where each bar represents
-                                    a particular year and the different stacks represent the percentage of deaths
-                                    attributed to different diseases. Upon clicking on a particular bar, the chart
-                                    expands to show another stacked bar chart representing the percentage of deaths per
-                                    disease across several countries. This **interactive** **feature** enables users to
-                                    explore the data in more detail and gain insights into how the disease burden varies
-                                    across different **countries** and over **time**.
-
-                                    On hover, that particular bar gets **highlighted** and a **tooltip** pops up. The
-                                    tooltip provides relevant information such as disease name, % of deaths due to that
-                                    disease.
                                 </p>
                             </div>
                         </div>
