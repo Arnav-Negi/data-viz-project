@@ -1,6 +1,3 @@
-// Copyright 2021 Observable, Inc.
-// Released under the ISC license.
-// https://observablehq.com/@d3/index-chart
 function IndexChart(data, {
     x = ([x]) => x, // given d in data, returns the (temporal) x-value
     y = ([, y]) => y, // given d in data, returns the (quantitative) y-value
@@ -163,7 +160,7 @@ const dataContainer = []
 const cause = 'self_harm'
 const file = 'https://raw.githubusercontent.com/Arnav-Negi/data-viz-project/main/data/disease-burden-from-injuries.csv'
 
-function build() {
+function buildLineChart() {
     document.getElementById('suicide_chart').innerHTML = '';
     document.getElementById('suicide_chart').append(IndexChart(dataContainer, {
         x: (d) => d.year,
@@ -184,6 +181,6 @@ d3.csv(file, (d) => {
     })
 }).then(
     (data) => {
-        build();
+        buildLineChart();
     }
 )
