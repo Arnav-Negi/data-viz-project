@@ -69,7 +69,11 @@ d3.csv(
   }
   var subgroups = data.columns.slice(3);
 
-var groupsStacked = [1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019];
+  var groupsStacked = [
+    1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+    2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013,
+    2014, 2015, 2016, 2017, 2018, 2019,
+  ];
 
   console.log(groupsStacked);
   var x = d3.scaleBand().domain(groupsStacked).range([0, 800]).padding([0.4]);
@@ -115,7 +119,6 @@ var groupsStacked = [1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
       "#FF4500",
     ]);
 
-
   myArray.forEach(function (d) {
     tot = 0;
     for (i in subgroups) {
@@ -152,7 +155,7 @@ var groupsStacked = [1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
     .enter()
     .append("rect")
     .attr("x", function (d) {
-        console.log(d.data.Year);
+      // console.log(d.data.Year);
       return x(d.data.Year);
     })
     .attr("y", function (d) {
@@ -165,39 +168,42 @@ var groupsStacked = [1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
     .on("mouseover", function (d, i) {
       d3.select(this).attr("stroke", "black").attr("stroke-width", "2px");
       let difference = i[1] - i[0];
-      console.log(difference);
+      //   console.log(difference);
       let key = "";
       for (const k in i.data) {
         if (Math.abs(i.data[k] - difference) < Math.pow(10, -5)) {
           key = k;
         }
       }
-        console.log(key);
-        console.log(i.data[key]);
-        console.log(i.data.Year);
-        let tooltipContent1 =
-          "Disease: " +
-          key +
-          "<br>" +
-          "Number %: " +
-          d.data[key] +
-          "<br>" +
-          "Year: " +
-          d.data.Year;
+      // console.log(key);
+      // console.log(i.data[key]);
+      // console.log(i.data.Year);
 
-        tippy(this, {
-          content: tooltipContent1,
-          allowHTML: true,
-        });
+      var percent = i.data[key];
+
+      let tooltipContent1 =
+        "Disease: " +
+        key.toString() +
+        "<br>" +
+        "Number %: " +
+        percent +
+        "<br>" +
+        "Year: " +
+        i.data.Year.toString();
+
+      tippy(this, {
+        content: tooltipContent1,
+        allowHTML: true,
+      });
     })
     .on("mouseout", function (d, i) {
       d3.select(this).attr("stroke", "none");
     });
 
-  svgStacked.selectAll("rect").on("click", function (d) {
+  svgStacked.selectAll("rect").on("click", function (d, i) {
     // groups = countries
     // sub groups = diseases (same)
-    const newYear = d.data.Year;
+    const newYear = i.data.Year;
     // console.log(newYear);
     svgStacked.selectAll("rect").remove();
     xGroup.remove();
@@ -263,33 +269,37 @@ var groupsStacked = [1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
         return y(d[0]) - y(d[1]);
       })
       .attr("width", x.bandwidth())
-      .on("mouseover", function (d, i) {
+      .on("mouseover", function (e, i) {
         d3.select(this).attr("stroke", "black").attr("stroke-width", "2px");
-        // console.log(d, i);
+        console.log(e, i);
         // console.log(d[1] - d[0]);
-        let difference = d[1] - d[0];
+        let difference = i[1] - i[0];
+        // console.log(difference);
         // console.log(typeof (d.data));
         let key = "";
-        for (const k in d.data) {
-          if (Math.abs(d.data[k] - difference) < Math.pow(10, -5)) {
+        for (const k in i.data) {
+          if (Math.abs(i.data[k] - difference) < Math.pow(10, -5)) {
             key = k;
           }
         }
+        // console.log(i.data.Country);
         // console.log(key);
+        // console.log(i.data[key]);
+        // console.log(i.data.Year);
 
-        console.log(countries[i]);
+        percent = i.data[key];
         let tooltipContent1 =
           "Country: " +
-          countries[i] +
+          i.data.Country +
           "<br>" +
           "Disease: " +
           key +
           "<br>" +
           "Number %: " +
-          d.data[key] +
+          percent +
           "<br>" +
           "Year: " +
-          d.data.Year;
+          i.data.Year;
 
         tippy(this, {
           content: tooltipContent1,
